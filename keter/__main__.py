@@ -17,5 +17,12 @@ class Controller:
         Sets up the whole system and runs the worker. The kitchen sink command.
         """
         _work(queue, everything=True)
+
+    def work(self, queue='all'):
+        """
+        Just spawn a worker and listen for new jobs.
+        """
+        _work(queue)
+
 def main():
     Fire(Controller)
