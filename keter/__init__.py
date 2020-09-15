@@ -28,9 +28,11 @@ def _forecast_cache_is_fresh():
     return False
 
 def work(queue):
+    if queue == 'all':
+        queue = ['cpu', 'gpu']
     with Connection(Redis(_REDIS_HOST)):
         worker = Worker(queue)
-        worker.work()
+        worker.work(with_scheduler=True)
 
 def up():
     if not _chembl_data_exists():
