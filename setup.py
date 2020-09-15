@@ -23,7 +23,7 @@ class PyTest(test):
 setup(
     name='keter',
     version='0.0.1',
-    description='Bioinformatics platform',
+    description='Highly scalable coronavirus science platform',
     long_description=open("README.rst").read(),
     keywords='machine_learning artificial_intelligence medicine devops',
     author='JJ Ben-Joseph',
