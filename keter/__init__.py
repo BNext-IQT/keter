@@ -10,7 +10,7 @@ CPU = Queue(name='cpu', connection=Redis(_REDIS_HOST))
 GPU = Queue(name='gpu', connection=Redis(_REDIS_HOST))
 
 _FORECAST_FRESHNESS = timedelta(hours=24)
-_MIN_JOBS = 10
+_FOREMAN_RESPAWN = timedelta(minutes=30)
 
 def _chembl_data_exists():
     return False
@@ -41,12 +41,16 @@ def up():
         GPU.enqueue(chemistry_model_train)
     if not _forecast_model_exists():
         GPU.enqueue(forecast_model_train)
+    CPU.enqueue(foreman)  
+
+def foreman():
+    CPU.enqueue_in(_FOREMAN_RESPAWN, foreman)
     if not _forecast_cache_is_fresh():
         GPU.enqueue(forecast_cache_infer)
         GPU.enqueue_in(_FORECAST_FRESHNESS - timedelta(hours=1), forecast_cache_infer)
-    for _ in range(1, _MIN_JOBS - len(GPU)):
+    drug_discovery_jobs_to_create = len(Worker.all(queue=GPU)) * 2 - len(GPU)
+    for _ in range(drug_discovery_jobs_to_create):
         GPU.enqueue(chemistry_discover_drugs)
-    CPU.enqueue(up)  
 
 def download_chembl():
     sleep(2)
