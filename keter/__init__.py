@@ -35,15 +35,12 @@ def work(queue):
         worker.work(with_scheduler=True)
 
 def up():
-    if not _chembl_data_exists():
-        CPU.enqueue(download_chembl)
     if not _nyt_data_exists():
         CPU.enqueue(download_nyt)
     if not _chemistry_model_exists():
         GPU.enqueue(chemistry_model_train)
     if not _forecast_model_exists():
-        GPU.enqueue(forecast_model_train)
-    CPU.enqueue(foreman)  
+        GPU.enqueue(forecast_model_train)  
 
 def foreman():
     CPU.enqueue_in(_FOREMAN_RESPAWN, foreman)
@@ -53,9 +50,6 @@ def foreman():
     drug_discovery_jobs_to_create = len(Worker.all(queue=GPU)) * 2 - len(GPU)
     for _ in range(drug_discovery_jobs_to_create):
         GPU.enqueue(chemistry_discover_drugs)
-
-def download_chembl():
-    sleep(2)
 
 def download_nyt():
     sleep(2)
