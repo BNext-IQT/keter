@@ -6,6 +6,10 @@ _DATA_VIEWS = {
     'smiles': {
         'sql': 'select canonical_smiles from compound_structures',
         'cache': timedelta(days=180)
+    },
+    'disease_reports': {
+        'sql': 'select * from disease_reports',
+        'cache': False
     }
 }
 
