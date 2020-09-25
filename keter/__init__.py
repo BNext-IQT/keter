@@ -5,9 +5,9 @@ from pathlib import Path
 from rq import Queue, Worker, Connection
 from redis import Redis
 
-_REDIS_HOST = os.environ.get('KETER_QUEUE') or ''
-CPU = Queue(name='cpu', connection=Redis(_REDIS_HOST))
-GPU = Queue(name='gpu', connection=Redis(_REDIS_HOST))
+_REDIS_HOST = Redis(os.environ.get('KETER_QUEUE') or '')
+CPU = Queue(name='cpu', connection=_REDIS_HOST)
+GPU = Queue(name='gpu', connection=_REDIS_HOST)
 
 _FORECAST_FRESHNESS = timedelta(hours=24)
 _FOREMAN_RESPAWN = timedelta(minutes=30)
@@ -30,7 +30,7 @@ def _forecast_cache_is_fresh():
 def work(queue):
     if queue == 'all':
         queue = ['cpu', 'gpu']
-    with Connection(Redis(_REDIS_HOST)):
+    with Connection(_REDIS_HOST):
         worker = Worker(queue)
         worker.work(with_scheduler=True)
 
