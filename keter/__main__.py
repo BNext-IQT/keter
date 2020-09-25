@@ -1,11 +1,11 @@
 import os
 from fire import Fire
-from keter import GPU, CPU, up, work
+from keter import GPU, CPU, work, foreman
 
 def _work(queue, everything=False):
     if queue in ['cpu', 'gpu', 'all']:
         if everything:
-            up()
+            foreman()
         work(queue)
     else:
         print(f"Error: Queue {queue} is unsupported")
@@ -14,7 +14,7 @@ def _work(queue, everything=False):
 class Controller:
     def up(self, queue='all'):
         """
-        Sets up the whole system and runs the worker. The kitchen sink command.
+        Run the foreman job and listen for more jobs.
         """
         _work(queue, everything=True)
 

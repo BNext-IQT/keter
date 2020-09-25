@@ -34,24 +34,21 @@ def work(queue):
         worker = Worker(queue)
         worker.work(with_scheduler=True)
 
-def up():
-    if not _nyt_data_exists():
-        CPU.enqueue(download_nyt)
+def foreman():
+    CPU.enqueue_in(_FOREMAN_RESPAWN, foreman)
     if not _chemistry_model_exists():
         GPU.enqueue(chemistry_model_train)
     if not _forecast_model_exists():
         GPU.enqueue(forecast_model_train)  
-
-def foreman():
-    CPU.enqueue_in(_FOREMAN_RESPAWN, foreman)
     if not _forecast_cache_is_fresh():
+        CPU.enqueue(coronavirus_cases_update)
         GPU.enqueue(forecast_cache_infer)
         GPU.enqueue_in(_FORECAST_FRESHNESS - timedelta(hours=1), forecast_cache_infer)
     drug_discovery_jobs_to_create = len(Worker.all(queue=GPU)) * 2 - len(GPU)
     for _ in range(drug_discovery_jobs_to_create):
-        GPU.enqueue(chemistry_discover_drugs)
+        GPU.enqueue(chemistry_discover_drugs, 'test_model', 'sqlite:///')
 
-def download_nyt():
+def coronavirus_cases_update():
     sleep(2)
 
 def chemistry_model_train():
@@ -63,5 +60,5 @@ def forecast_model_train():
 def forecast_cache_infer():
     sleep(2)
 
-def chemistry_discover_drugs():
+def chemistry_discover_drugs(model: str, db: str):
     sleep(2)
