@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 LABEL maintainer="JJ Ben-Joseph (jbenjoseph@iqt.org)" \
-      description="All the low usage Python webapps shared in one container."
+      description="Contains the UI for managing RQ jobs."
 EXPOSE 8080
 CMD uwsgi --http :8080 --wsgi-file app.py
 COPY app.py /
