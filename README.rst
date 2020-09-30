@@ -1,5 +1,5 @@
-Keter
-~~~~~
+.. image:: keter.svg
+   :alt: The Keter logo
 
 Keter (keh-ter) is a highly-scalable lab environment for coronavirus data science. This project 
 is informed by lessons learned from past B.Next projects.
