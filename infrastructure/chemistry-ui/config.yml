@@ -1,0 +1,25 @@
+run_env: DEV #DEV, TRAVIS, TEST or PROD
+debug_mode: False
+elasticsearch:
+  public_host: 'https://wwwdev.ebi.ac.uk/chembl/elk/es'
+chembl_api:
+  ws_url: 'https://www.ebi.ac.uk/chembl/api/data'
+  beaker_url: 'https://www.ebi.ac.uk/chembl/api/utils'
+current_release:
+  full_name: 'CHEMBL27'
+  full_doi: 'http://doi.org/10.6019/CHEMBL.database.27'
+  downloads_date: '2020-02-21'
+  # The basename of the files in the ftp
+  downloads_release_name: 'chembl_27'
+  elasticsearch_chembl_index_prefix: 'chembl_27_'
+server_secret_key: 'server_secret_key'
+enable_twitter: True
+twitter_secrets:
+  twitter_access_token: 'twitter_access_token'
+  twitter_access_token_secret: 'twitter_access_token_secret'
+  twitter_access_consumer_key: 'twitter_access_consumer_key'
+  twitter_access_consumer_secret: 'twitter_access_consumer_secret'
+enable_blogger: True
+blogger_secrets:
+  blogger_key: 'blogger_key'
+es_proxy_base_url: 'https://wwwdev.ebi.ac.uk/chembl/elk/es'
