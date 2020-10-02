@@ -60,5 +60,5 @@ def forecast_model_train():
 def forecast_cache_infer():
     sleep(2)
 
-def chemistry_discover_drugs(model: str, db: str):
+def chemistry_discover_drugs():
     sleep(2)
