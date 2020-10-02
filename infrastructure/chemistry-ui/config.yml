@@ -1,5 +1,7 @@
-run_env: DEV #DEV, TRAVIS, TEST or PROD
+run_env: PROD #DEV, TRAVIS, TEST or PROD
 debug_mode: False
+enable_twitter: False
+enable_blogger: False
 elasticsearch:
   public_host: 'https://wwwdev.ebi.ac.uk/chembl/elk/es'
 chembl_api:
@@ -13,13 +15,9 @@ current_release:
   downloads_release_name: 'chembl_27'
   elasticsearch_chembl_index_prefix: 'chembl_27_'
 server_secret_key: 'server_secret_key'
-enable_twitter: True
-twitter_secrets:
-  twitter_access_token: 'twitter_access_token'
-  twitter_access_token_secret: 'twitter_access_token_secret'
-  twitter_access_consumer_key: 'twitter_access_consumer_key'
-  twitter_access_consumer_secret: 'twitter_access_consumer_secret'
-enable_blogger: True
-blogger_secrets:
-  blogger_key: 'blogger_key'
 es_proxy_base_url: 'https://wwwdev.ebi.ac.uk/chembl/elk/es'
+static_files:
+  watch_and_update_static_compiled_files: False
+  static_files_source: '/app/src/glados/static'
+  static_files_destination: '/app/compiled_statics'
+  enable_statics_compression: True
