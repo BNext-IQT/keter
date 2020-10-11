@@ -3,10 +3,13 @@ import sys
 from fire import Fire
 import keter
 
-def _work(queue, job):
+def _work(queue, job, params=None):
     if job:
         try:
-            getattr(keter, job)()
+            if params:
+                getattr(keter, job)(**params)
+            else:
+                getattr(keter, job)()
         except AttributeError:
             print(f"Error: No job named {job}")
             sys.exit(-1)
@@ -25,7 +28,7 @@ class Controller:
         """
         _work(queue, 'foreman')
 
-    def work(self, queue='all', job=''):
+    def work(self, queue='all', job='', params=''):
         """
         Spawn a worker and listen for new jobs.
         
@@ -33,8 +36,9 @@ class Controller:
         queue -- What queue to listen for (eg. gpu, cpu). Use "all" to listen for anything. 
                  The queue "none" can be used with the job param to just execute a job.
         job -- Job to execute before joining the queue.
+        params -- Job parameters if applicable.
         """
-        _work(queue, job)
+        _work(queue, job, params)
 
 def main():
     Fire(Controller)
