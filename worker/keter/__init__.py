@@ -4,17 +4,21 @@ from datetime import timedelta
 from pathlib import Path
 from rq import Queue, Worker, Connection
 from redis import Redis
+import redis.exceptions
 from sqlalchemy import create_engine
 
-_REDIS_HOST = Redis(os.environ.get('KETER_QUEUE') or '')
-CPU = Queue(name='cpu', connection=_REDIS_HOST)
-GPU = Queue(name='gpu', connection=_REDIS_HOST)
-DB = _REDIS_HOST.get('KETER_DB')
-if DB:
-    DB = create_engine(DB.decode())
-else:
-    DB = create_engine(os.environ.get('KETER_DB') or 'sqlite:///')
-CACHE = Path(_REDIS_HOST.get('KETER_CACHE') or os.environ.get('KETER_CACHE') or '~/.keter')
+try:
+    _REDIS_HOST = Redis(os.environ.get('KETER_QUEUE') or '')
+    CPU = Queue(name='cpu', connection=_REDIS_HOST)
+    GPU = Queue(name='gpu', connection=_REDIS_HOST)
+    DB = _REDIS_HOST.get('KETER_DB')
+    if DB:
+        DB = create_engine(DB.decode())
+    else:
+        DB = create_engine(os.environ.get('KETER_DB') or 'sqlite:///')
+    CACHE = Path(_REDIS_HOST.get('KETER_CACHE') or os.environ.get('KETER_CACHE') or '~/.keter')
+except redis.exceptions.ConnectionError:
+    raise RuntimeError("Could not connect to Redis. Is KETER_QUEUE set?")
 
 _FORECAST_FRESHNESS = timedelta(hours=24)
 _FOREMAN_RESPAWN = timedelta(minutes=30)
