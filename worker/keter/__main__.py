@@ -27,7 +27,12 @@ class Controller:
 
     def work(self, queue='all', job=''):
         """
-        Just spawn a worker and listen for new jobs.
+        Spawn a worker and listen for new jobs.
+        
+        Keyword arguments:
+        queue -- What queue to listen for (eg. gpu, cpu). Use "all" to listen for anything. 
+                 The queue "none" can be used with the job param to just execute a job.
+        job -- Job to execute before joining the queue.
         """
         _work(queue, job)
 
