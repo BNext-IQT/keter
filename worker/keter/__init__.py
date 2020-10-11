@@ -69,3 +69,7 @@ def forecast_cache_infer():
 
 def chemistry_discover_drugs():
     sleep(2)
+
+def chemistry_ingest_chembl(url):
+    print(url)
+    sleep(2)
