@@ -22,9 +22,18 @@ def _work(queue, job, params=None):
         sys.exit(-1)
 
 class Controller:
+    """
+    Available commands: up, work.
+    
+    See specific commands for built-in help.
+    """
+
     def up(self, queue='all'):
         """
         Run the foreman job and listen for more jobs.
+
+        Keyword arguments:
+        queue -- What queue to listen for (eg. gpu, cpu). Use "all" to listen for anything. 
         """
         _work(queue, 'foreman')
 
