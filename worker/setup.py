@@ -44,7 +44,7 @@ setup(
         'Operating System :: OS Independent'
     ],
     packages=find_packages(),
-    install_requires=['rq', 'redis', 'SQLAlchemy'],
+    install_requires=['rq', 'redis', 'SQLAlchemy', 'pyarrow'],
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [

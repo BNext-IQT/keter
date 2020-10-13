@@ -5,13 +5,24 @@ from pathlib import Path
 from rq import Queue, Worker, Connection
 from redis import Redis
 import redis.exceptions
+import pandas as pd
+from keter.data import get_smiles_from_chembl
 from sqlalchemy import create_engine
 
 _CACHE = Path(os.environ.get('KETER_CACHE') or Path.home() / '.keter')
 _CACHE.mkdir(parents=True, exist_ok=True)
 
-_FORECAST_FRESHNESS = timedelta(hours=24)
-_FOREMAN_RESPAWN = timedelta(minutes=30)
+def load_df(name: str) -> pd.DataFrame:
+    df_file = (_CACHE / name).with_suffix('.df')
+    if not df_file.exists():
+        print("Cloud not implemented yet")
+        exit(-1)
+    
+    return pd.read_parquet(df_file)
+
+def dump_df(name: str, df: pd.DataFrame):
+    df_file = (_CACHE / name).with_suffix('.df')
+    df.to_parquet(df_file)
 
 def _chembl_data_exists():
     return False
@@ -71,6 +82,7 @@ def forecast_cache_infer():
 def chemistry_discover_drugs():
     sleep(2)
 
-def chemistry_ingest_chembl(url):
-    print(url)
-    sleep(2)
+def chemistry_ingest_chembl(dburl):
+    conn = create_engine(dburl)
+    df = get_smiles_from_chembl(conn)
+    dump_df('smiles', df)
