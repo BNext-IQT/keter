@@ -1,9 +1,13 @@
 import os
 import sys
 from fire import Fire
+from redis import Redis
 import keter
 
-def _work(queue, job, params=None):
+def _get_redis_url() -> str:
+    return os.environ.get('KETER_QUEUE') or ''
+
+def _work(queue, job=None, params=None):
     if job:
         try:
             if params:
@@ -14,7 +18,8 @@ def _work(queue, job, params=None):
             print(f"Error: No job named {job}")
             sys.exit(-1)
     if queue in ['cpu', 'gpu', 'all']:
-        keter.work(queue)
+        conn = _get_redis_url()
+        keter.work(queue, conn)
     elif queue == 'none':
         pass
     else:
@@ -35,7 +40,8 @@ class Controller:
         Keyword arguments:
         queue -- What queue to listen for (eg. gpu, cpu). Use "all" to listen for anything. 
         """
-        _work(queue, 'foreman')
+        keter.foreman(_get_redis_url())
+        _work(queue)
 
     def work(self, queue='all', job='', params=''):
         """

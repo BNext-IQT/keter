@@ -7,18 +7,8 @@ from redis import Redis
 import redis.exceptions
 from sqlalchemy import create_engine
 
-try:
-    _REDIS_HOST = Redis(os.environ.get('KETER_QUEUE') or '')
-    CPU = Queue(name='cpu', connection=_REDIS_HOST)
-    GPU = Queue(name='gpu', connection=_REDIS_HOST)
-    DB = _REDIS_HOST.get('KETER_DB')
-    if DB:
-        DB = create_engine(DB.decode())
-    else:
-        DB = create_engine(os.environ.get('KETER_DB') or 'sqlite:///')
-    CACHE = Path(_REDIS_HOST.get('KETER_CACHE') or os.environ.get('KETER_CACHE') or '~/.keter')
-except redis.exceptions.ConnectionError:
-    raise RuntimeError("Could not connect to Redis. Is KETER_QUEUE set?")
+_CACHE = Path(os.environ.get('KETER_CACHE') or Path.home() / '.keter')
+_CACHE.mkdir(parents=True, exist_ok=True)
 
 _FORECAST_FRESHNESS = timedelta(hours=24)
 _FOREMAN_RESPAWN = timedelta(minutes=30)
@@ -38,26 +28,33 @@ def _forecast_model_exists():
 def _forecast_cache_is_fresh():
     return False
 
-def work(queue):
+def work(queue: str, redis_url: str):
+    conn = Redis(redis_url)
     if queue == 'all':
         queue = ['cpu', 'gpu']
-    with Connection(_REDIS_HOST):
+    with Connection(conn):
         worker = Worker(queue)
         worker.work(with_scheduler=True)
 
-def foreman():
-    CPU.enqueue_in(_FOREMAN_RESPAWN, foreman)
+def foreman(redis_url: str):
+    conn = Redis(redis_url)
+    foreman_respawn_time = timedelta(minutes=30)
+
+    cpu = Queue(name='cpu', connection=conn)
+    gpu = Queue(name='gpu', connection=conn)
+
+    cpu.enqueue_in(foreman_respawn_time, foreman, redis_url)
+
     if not _chemistry_model_exists():
-        GPU.enqueue(chemistry_model_train)
+        gpu.enqueue(chemistry_model_train)
     if not _forecast_model_exists():
-        GPU.enqueue(forecast_model_train)  
+        gpu.enqueue(forecast_model_train)  
     if not _forecast_cache_is_fresh():
-        CPU.enqueue(coronavirus_cases_update)
-        GPU.enqueue(forecast_cache_infer)
-        GPU.enqueue_in(_FORECAST_FRESHNESS - timedelta(hours=1), forecast_cache_infer)
-    drug_discovery_jobs_to_create = len(Worker.all(queue=GPU)) * 2 - len(GPU)
+        cpu.enqueue(coronavirus_cases_update)
+        gpu.enqueue(forecast_cache_infer)
+    drug_discovery_jobs_to_create = len(Worker.all(queue=gpu)) * 2 - len(gpu)
     for _ in range(drug_discovery_jobs_to_create):
-        GPU.enqueue(chemistry_discover_drugs)
+        gpu.enqueue(chemistry_discover_drugs)
 
 def coronavirus_cases_update():
     sleep(2)
