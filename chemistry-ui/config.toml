@@ -2,3 +2,6 @@ baseURL = "http://example.org/"
 languageCode = "en-us"
 title = "Keter Chemistry"
 theme = "chemistry"
+
+[params]
+description = "A user interface for chemicals."
