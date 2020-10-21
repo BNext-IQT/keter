@@ -1,9 +1,12 @@
 {{ partial "header.html" . }}
 
+<script src="https://unpkg.com/smiles-drawer@1.2.0/dist/smiles-drawer.min.js"></script>
+
 <div class="container">
     <div class="row">
         <div class="one-half column">
             <h4>{{ .Title }}</h4>
+            <canvas data-smiles="{{ .Params.smiles }}"></canvas>
         </div>
         <div class="one-half column">
             <h5>Representations</h5>
@@ -25,5 +28,7 @@
         </div>
     </div>
 </div>
+
+<script>SmilesDrawer.apply({ width: 400, height: 230, padding: 10});</script>
 
 {{ partial "footer.html" . }}
