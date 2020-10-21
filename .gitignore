@@ -1,5 +1,8 @@
 # Lab specific
 data/
+
+# Hugo
+public/
  
 # MacOS
 .DS_Store
