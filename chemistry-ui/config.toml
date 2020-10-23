@@ -3,5 +3,8 @@ languageCode = "en-us"
 title = "Keter Chemistry"
 theme = "chemistry"
 
+[author]
+name = "B.Next"
+
 [params]
 description = "A user interface for chemicals."
