@@ -5,17 +5,24 @@
 <div class="container">
     <div class="row">
         <div class="one-half column">
-            <h4>{{ .Title }}</h4>
+            <h3><u>{{ .Title }}</u></h3>
+            <h4><b>Drug Value:</b> {{ .Params.val }}</h4>
             <canvas data-smiles="{{ .Params.smiles }}"></canvas>
         </div>
         <div class="one-half column">
+            <h5>Scores</h5>
+            <p>
+                <b>Toxicity:</b> {{ .Params.tox }}
+                <br>
+                <b>Manufacturability:</b> {{ .Params.mfg }}
+            </p>
             <h5>Representations</h5>
             <p>
                 <b>InChl Key:</b> {{ .Params.key }}
                 <br>
                 <b>SMILES:</b> {{ .Params.smiles }}
             </p>
-            <h5>Rule of Five</h5>
+            <h5>Properties</h5>
             <p>
                 <b>Mass:</b> {{ .Params.mass }}
                 <br>
@@ -27,8 +34,22 @@
             </p>
         </div>
     </div>
+    {{ if .Params.activity }}
+        <div class="row">
+            <h5>Bioactivity</h5>
+        </div>
+        <table>
+        <tr>
+            <th>Target</th>
+            <th>Affinity</th>
+        </tr>
+        {{ range $key, $value := .Params.activity }}
+            <tr><td>{{ $key }}</td><td>{{ $value }}</td></tr>
+        {{ end }}
+        </table>
+    {{ end }}
 </div>
 
-<script>SmilesDrawer.apply({ width: 400, height: 230, padding: 10});</script>
+<script>SmilesDrawer.apply({ width: 400, height: 300, padding: 10});</script>
 
 {{ partial "footer.html" . }}
