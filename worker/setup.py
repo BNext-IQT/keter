@@ -44,7 +44,10 @@ setup(
         'Operating System :: OS Independent'
     ],
     packages=find_packages(),
-    install_requires=['rq', 'redis', 'SQLAlchemy', 'pyarrow', 'selfies'],
+    install_requires=['rq', 'redis', 'SQLAlchemy', 'pyarrow', 'selfies',
+                      'fire', 'deepchem>=2.4.0rc1.dev20201021184017',
+                      'tensorflow'
+    ],
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
