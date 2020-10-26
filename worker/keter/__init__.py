@@ -9,11 +9,15 @@ import pandas as pd
 from keter.data import get_smiles_from_chembl
 from sqlalchemy import create_engine
 
-_CACHE = Path(os.environ.get('KETER_CACHE') or Path.home() / '.keter')
-_CACHE.mkdir(parents=True, exist_ok=True)
+CACHE = Path(os.environ.get('KETER_CACHE') or Path.home() / '.keter')
+CACHE.mkdir(parents=True, exist_ok=True)
+QUEUE = os.environ.get('KETER_QUEUE') or ''
+
+# DeepChem persists MolNet data based on this env variable
+os.environ['DEEPCHEM_DATA_DIR'] = str(CACHE / 'data' / 'molnet')
 
 def load_df(name: str) -> pd.DataFrame:
-    df_file = (_CACHE / name).with_suffix('.df')
+    df_file = (CACHE / name).with_suffix('.df')
     if not df_file.exists():
         print("Cloud not implemented yet")
         exit(-1)
@@ -21,7 +25,7 @@ def load_df(name: str) -> pd.DataFrame:
     return pd.read_parquet(df_file)
 
 def dump_df(name: str, df: pd.DataFrame):
-    df_file = (_CACHE / name).with_suffix('.df')
+    df_file = (CACHE / name).with_suffix('.df')
     df.to_parquet(df_file)
 
 def _chembl_data_exists():
@@ -39,22 +43,22 @@ def _forecast_model_exists():
 def _forecast_cache_is_fresh():
     return False
 
-def work(queue: str, redis_url: str):
-    conn = Redis(redis_url)
+def work(queue: str):
+    conn = Redis(QUEUE)
     if queue == 'all':
         queue = ['cpu', 'gpu']
     with Connection(conn):
         worker = Worker(queue)
         worker.work(with_scheduler=True)
 
-def foreman(redis_url: str):
-    conn = Redis(redis_url)
+def foreman():
+    conn = Redis(QUEUE)
     foreman_respawn_time = timedelta(minutes=30)
 
     cpu = Queue(name='cpu', connection=conn)
     gpu = Queue(name='gpu', connection=conn)
 
-    cpu.enqueue_in(foreman_respawn_time, foreman, redis_url)
+    cpu.enqueue_in(foreman_respawn_time, foreman)
 
     if not _chemistry_model_exists():
         gpu.enqueue(chemistry_model_train)
