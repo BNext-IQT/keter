@@ -5,6 +5,15 @@ from setuptools.command.test import test
 import sys
 import os
 
+print("Checking for RDKit... ", end='')
+try:
+    from rdkit import Chem
+except ImportError:
+    print("ERROR!")
+    print("ERROR: RDKit not found. It is required and must be installed seperately.")
+    print("See: https://www.rdkit.org/docs/Install.html")
+    exit(-1)
+print("SUCCESS!")
 
 class PyTest(test):
     user_options = [('pytest-args=', 'a', "Arguments to pass to pytest")]
