@@ -10,8 +10,8 @@ def df2corpus(df: pd.DataFrame) -> Generator:
     
 
 class Chemistry:
-    def __init__(self):
-        tasks, datasets, transformers = dc.molnet.load_tox21(featurizer='GraphConv')
+    def __init__(self, path):
+        tasks, datasets, transformers = dc.molnet.load_tox21(featurizer='GraphConv', save_dir=path)
         train, verify, test = datasets
         model = dc.models.GraphConvModel(len(tasks), mode='classification')
         model.fit(train, nb_epoch=50)

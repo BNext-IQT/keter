@@ -6,15 +6,13 @@ from rq import Queue, Worker, Connection
 from redis import Redis
 import redis.exceptions
 import pandas as pd
-from keter.data import get_smiles_from_chembl
 from sqlalchemy import create_engine
+from keter.data import get_smiles_from_chembl
+from keter.chemistry import Chemistry
 
 CACHE = Path(os.environ.get('KETER_CACHE') or Path.home() / '.keter')
-CACHE.mkdir(parents=True, exist_ok=True)
+(CACHE / 'data' / 'molnet').mkdir(parents=True, exist_ok=True)
 QUEUE = os.environ.get('KETER_QUEUE') or ''
-
-# DeepChem persists MolNet data based on this env variable
-os.environ['DEEPCHEM_DATA_DIR'] = str(CACHE / 'data' / 'molnet')
 
 def load_df(name: str) -> pd.DataFrame:
     df_file = (CACHE / name).with_suffix('.df')
@@ -75,7 +73,7 @@ def coronavirus_cases_update():
     sleep(2)
 
 def chemistry_model_train():
-    sleep(2)
+    Chemistry(CACHE / 'data' / 'molnet')
 
 def forecast_model_train():
     sleep(2)
