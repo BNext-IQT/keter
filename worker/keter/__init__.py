@@ -73,7 +73,9 @@ def coronavirus_cases_update():
     sleep(2)
 
 def chemistry_model_train():
-    Chemistry(CACHE / 'data' / 'molnet')
+    chem = Chemistry(CACHE)
+    chem.fit()
+    chem.score()
 
 def forecast_model_train():
     sleep(2)
