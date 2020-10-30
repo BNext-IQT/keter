@@ -66,3 +66,6 @@ class Controller:
 
 def main():
     Fire(Controller)
+
+if __name__ == '__main__':
+    main()
