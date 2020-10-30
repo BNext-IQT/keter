@@ -15,7 +15,8 @@ def _work(queue, job=None, params=None):
         except AttributeError as e:
             if "module 'keter'" not in str(e):
                 raise e
-            print(f"Error: No job named {job}")
+            print(f"Error: No job named {job}.")
+            print(f"Some possibilites: {', '.join([i for i in dir(keter) if i[0].islower()])}.")
             sys.exit(-1)
     if queue in ['cpu', 'gpu', 'all']:
         keter.work(queue)
