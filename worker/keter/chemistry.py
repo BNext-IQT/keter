@@ -18,13 +18,15 @@ class Chemistry:
         self.gcm_model_dir = path / 'models' / 'chemistry' / 'gcm' / self.gcm_model_version / str(uuid4())
     
     def gather_data(self):
-        self.tasks, self.datasets, self.transformers = dc.molnet.load_tox21(featurizer='GraphConv', save_dir=self.molnet_dir)
+        tox_t, tox_d, tox_r = dc.molnet.load_tox21(featurizer='GraphConv', save_dir=self.molnet_dir)
+        muv_t, muv_d, muv_r = dc.molnet.load_muv(featurizer='GraphConv', save_dir=self.molnet_dir)
+        self.tasks, self.datasets, self.transformers = tox_t + muv_t, tox_d + muv_d, tox_r + muv_r
         self.train, self.verify, self.test = self.datasets
 
     def fit(self):
         if not hasattr(self, 'train'):
             self.gather_data()
-        model = dc.models.GraphConvModel(len(self.tasks), mode='classification', model_dir=self.gcm_model_dir)
+        model = dc.models.MultitaskClassifier(len(self.tasks), model_dir=self.gcm_model_dir)
         model.fit(self.train, nb_epoch=50)
 
         self.gcn = model
