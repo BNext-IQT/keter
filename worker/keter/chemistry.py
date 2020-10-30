@@ -2,7 +2,7 @@ from typing import Generator
 from uuid import uuid4
 import pandas as pd
 import deepchem as dc
-import selfies 
+import selfies
 
 def df2corpus(df: pd.DataFrame) -> Generator:
     if 'smiles' in df:
