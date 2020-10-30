@@ -48,8 +48,7 @@ class Controller:
         Spawn a worker and listen for new jobs.
         
         Keyword arguments:
-        queue -- What queue to listen for (eg. gpu, cpu). Use "all" to listen for anything. 
-                 The queue "none" can be used with the job param to just execute a job.
+        queue -- What queue to listen for (eg. gpu, cpu). Use "all" to listen for anything.
         job -- Job to execute before joining the queue.
         params -- Job parameters if applicable.
         """
