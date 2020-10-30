@@ -31,5 +31,6 @@ class Chemistry:
     
     def score(self):
         metric = dc.metrics.Metric(dc.metrics.roc_auc_score)
-        print('Training set score:', self.gcn.evaluate(self.test, [metric], self.transformers))
-        print('Test set score:', self.gcn.evaluate(self.train, [metric], self.transformers))
+        test_metric = self.gcn.evaluate(self.test, [metric], self.transformers)['roc_auc_score']
+        train_metric = self.gcn.evaluate(self.train, [metric], self.transformers)['roc_auc_score']
+        return test_metric, train_metric
