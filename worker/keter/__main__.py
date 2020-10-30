@@ -55,5 +55,17 @@ class Controller:
         """
         _work(queue, job, params)
 
+    
+    def run(self, job='', params=''):
+        """
+        Execute a job and exit.
+        
+        Keyword arguments:
+        job -- Job to execute.
+        params -- Job parameters if applicable.
+        """
+        _work("none", job, params)
+
+
 def main():
     Fire(Controller)
