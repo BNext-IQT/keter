@@ -17,22 +17,28 @@ class Chemistry:
         self.molnet_dir = path / 'data' / 'molnet'
         self.gcm_model_dir = path / 'models' / 'chemistry' / 'gcm' / self.gcm_model_version / str(uuid4())
     
-    def gather_data(self):
-        tox_t, tox_d, tox_r = dc.molnet.load_tox21(featurizer='GraphConv', save_dir=self.molnet_dir)
-        muv_t, muv_d, muv_r = dc.molnet.load_muv(featurizer='GraphConv', save_dir=self.molnet_dir)
-        self.tasks, self.datasets, self.transformers = tox_t + muv_t, tox_d + muv_d, tox_r + muv_r
+    def gather_data(self, task='muv'):
+        if task == 'tox':
+            t, d, r = dc.molnet.load_tox21(split='stratified', save_dir=self.molnet_dir)
+        elif task == 'muv':
+            t, d, r = dc.molnet.load_muv(split='stratified', save_dir=self.molnet_dir)
+        self.tasks, self.datasets, self.transformers = t, d, r
         self.train, self.verify, self.test = self.datasets
 
     def fit(self):
         if not hasattr(self, 'train'):
             self.gather_data()
-        model = dc.models.MultitaskClassifier(len(self.tasks), model_dir=self.gcm_model_dir)
-        model.fit(self.train, nb_epoch=50)
+        n_features = self.train.get_data_shape()[0]
+        n_tasks = len(self.tasks)
+        model = dc.models.MultitaskClassifier(n_tasks, n_features, model_dir=self.gcm_model_dir)
+        model.fit(self.train)
+
+        self.model = model
 
         self.gcn = model
     
     def score(self):
         metric = dc.metrics.Metric(dc.metrics.roc_auc_score)
-        test_metric = self.gcn.evaluate(self.test, [metric], self.transformers)['roc_auc_score']
-        train_metric = self.gcn.evaluate(self.train, [metric], self.transformers)['roc_auc_score']
+        test_metric = self.model.evaluate(self.test, [metric], self.transformers)['roc_auc_score']
+        train_metric = self.model.evaluate(self.train, [metric], self.transformers)['roc_auc_score']
         return test_metric, train_metric
