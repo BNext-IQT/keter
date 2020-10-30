@@ -55,7 +55,7 @@ setup(
     packages=find_packages(),
     install_requires=['rq', 'redis', 'SQLAlchemy', 'pyarrow', 'selfies',
                       'fire', 'deepchem>=2.4.0rc1.dev20201021184017',
-                      'tensorflow'
+                      'tensorflow>=2.3'
     ],
     tests_require=['pytest'],
     entry_points={
