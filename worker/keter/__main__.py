@@ -1,8 +1,6 @@
 import os
 import sys
-from pathlib import Path
 from fire import Fire
-from redis import Redis
 import keter
 
 def _work(queue, job=None, params=None):
