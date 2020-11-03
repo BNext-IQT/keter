@@ -87,7 +87,5 @@ def forecast_cache_infer():
 def chemistry_discover_drugs():
     sleep(2)
 
-def chemistry_ingest_chembl(dburl):
-    conn = create_engine(dburl)
-    df = get_smiles_from_chembl(conn)
-    dump_df('smiles', df)
+def create_supervised_dataset():
+    create_supervised_ground_truth().to_parquet(CACHE / "supervised.df")
