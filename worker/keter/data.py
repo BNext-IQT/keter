@@ -1,10 +1,13 @@
-from datetime import timedelta
 import pandas as pd
-from sqlalchemy.engine import Connectable
+from functools import reduce
 
-def get_smiles_from_chembl(conn: Connectable) -> pd.DataFrame:
-    query = 'select canonical_smiles as smiles, ' \
-            'standard_inchi as inchi, ' \
-            'standard_inchi_key as inchi_key ' \
-            'from compound_structures'
-    return pd.read_sql(query, conn)
+
+def create_supervised_ground_truth():
+    supervised = [
+        "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/tox21.csv.gz",
+        "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/muv.csv.gz",
+    ]
+    return reduce(
+        lambda left, right: pd.merge(left, right, on="smiles", how="outer", sort=False),
+        (pd.read_csv(csv) for csv in supervised),
+    )
