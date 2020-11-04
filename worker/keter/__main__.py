@@ -3,7 +3,8 @@ import sys
 from fire import Fire
 import keter
 
-def _work(queue, job=None, params=None):
+
+def _do_work(queue, job=None, params=None):
     if job:
         try:
             if params:
@@ -14,15 +15,18 @@ def _work(queue, job=None, params=None):
             if "module 'keter'" not in str(e):
                 raise e
             print(f"Error: No job named {job}.")
-            print(f"Some possibilites: {', '.join([i for i in dir(keter) if i[0].islower()])}.")
+            print(
+                f"Some possibilites: {', '.join([i for i in dir(keter) if i[0].islower()])}."
+            )
             sys.exit(-1)
-    if queue in ['cpu', 'gpu', 'all']:
+    if queue in ["cpu", "gpu", "all"]:
         keter.work(queue)
-    elif queue == 'none':
+    elif queue == "none":
         pass
     else:
         print(f"Error: Queue {queue} is unsupported")
         sys.exit(-1)
+
 
 class Controller:
     """
@@ -31,7 +35,7 @@ class Controller:
     See specific commands for built-in help.
     """
 
-    def up(self, queue='all'):
+    def up(self, queue="all"):
         """
         Run the foreman job and listen for more jobs.
 
@@ -41,7 +45,7 @@ class Controller:
         keter.foreman()
         _work(queue)
 
-    def work(self, queue='all', job='', params=''):
+    def work(self, queue="all", job="", params=""):
         """
         Spawn a worker and listen for new jobs.
         
@@ -50,10 +54,9 @@ class Controller:
         job -- Job to execute before joining the queue.
         params -- Job parameters if applicable.
         """
-        _work(queue, job, params)
+        _do_work(queue, job, params)
 
-    
-    def run(self, job='', params=''):
+    def run(self, job="", params=""):
         """
         Execute a job and exit.
         
@@ -61,11 +64,12 @@ class Controller:
         job -- Job to execute.
         params -- Job parameters if applicable.
         """
-        _work("none", job, params)
+        _do_work("none", job, params)
 
 
 def main():
     Fire(Controller)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
