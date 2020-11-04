@@ -58,8 +58,6 @@ def foreman():
     cpu.enqueue(coronavirus_cases_update)
     gpu.enqueue(chemistry_model_train)
     gpu.enqueue(forecast_model_train)
-        gpu.enqueue(forecast_model_train)  
-    gpu.enqueue(forecast_model_train)
 
 
 def coronavirus_cases_update():
@@ -87,5 +85,7 @@ def forecast_cache_infer():
 def chemistry_discover_drugs():
     sleep(2)
 
-def create_supervised_dataset():
-    create_supervised_ground_truth().to_parquet(CACHE / "supervised.df")
+
+def create_datasets():
+    gather_mols_with_props().to_parquet(CACHE_MOLS_WITH_FEATURES)
+    gather_mols().to_parquet(CACHE_MOLS)
