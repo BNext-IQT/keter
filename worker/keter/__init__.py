@@ -8,7 +8,7 @@ from redis import Redis
 import redis.exceptions
 import pandas as pd
 from sqlalchemy import create_engine
-from keter.data import gather_mols_with_props, gather_mols
+from keter.data import gather_mols_with_props
 from keter.chemistry import Chemistry
 
 CACHE_ROOT = Path(os.environ.get("KETER_CACHE") or Path.home() / ".keter")
@@ -88,4 +88,3 @@ def chemistry_discover_drugs():
 
 def create_datasets():
     gather_mols_with_props().to_parquet(CACHE_MOLS_WITH_FEATURES)
-    gather_mols().to_parquet(CACHE_MOLS)
