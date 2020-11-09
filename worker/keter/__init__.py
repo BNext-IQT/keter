@@ -8,15 +8,15 @@ from redis import Redis
 import redis.exceptions
 import pandas as pd
 from sqlalchemy import create_engine
-from keter.data import gather_mols_with_props
+from keter.data import gather_mols_with_props, transform_elemental_language
 from keter.chemistry import Chemistry
 
 CACHE_ROOT = Path(os.environ.get("KETER_CACHE") or Path.home() / ".keter")
 CACHE_GROUND_TRUTH = CACHE_ROOT / "ground_truth"
 CACHE_FEATURES = CACHE_ROOT / "features"
 CACHE_MODELS = CACHE_ROOT / "models"
-CACHE_MOLS_WITH_FEATURES = CACHE_GROUND_TRUTH / "mols_with_features.parquet"
 CACHE_MOLS = CACHE_GROUND_TRUTH / "mols.parquet"
+CACHE_FEATURES_ELE_LANG = CACHE_FEATURES / "elemental.txt.gz"
 
 CACHE_GROUND_TRUTH.mkdir(parents=True, exist_ok=True)
 CACHE_FEATURES.mkdir(exist_ok=True)
@@ -46,7 +46,7 @@ def work(queue: str):
 
 def foreman():
     conn = Redis(QUEUE)
-    foreman_respawn_time = timedelta(minutes=10)
+    foreman_respawn_time = timedelta(minutes=5)
 
     cpu = Queue(name="cpu", connection=conn, default_timeout=7200)
     gpu = Queue(name="gpu", connection=conn, default_timeout=36000)
@@ -54,6 +54,9 @@ def foreman():
 
     if not CACHE_MOLS.exists():
         cpu.enqueue(create_datasets)
+    else:
+        if not CACHE_FEATURES_ELE_LANG.exists():
+            cpu.enqueue(create_elemental_language)
 
     cpu.enqueue(coronavirus_cases_update)
     gpu.enqueue(chemistry_model_train)
@@ -87,4 +90,9 @@ def chemistry_discover_drugs():
 
 
 def create_datasets():
-    gather_mols_with_props().to_parquet(CACHE_MOLS_WITH_FEATURES)
+    gather_mols_with_props().to_parquet(CACHE_MOLS)
+
+
+def create_elemental_language():
+    dataset = pd.read_parquet(CACHE_MOLS)
+    transform_elemental_language(dataset, str(CACHE_FEATURES_ELE_LANG))
