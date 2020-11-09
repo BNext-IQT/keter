@@ -30,7 +30,7 @@ QUEUE = os.environ.get("KETER_QUEUE") or ""
 
 def _queue_repeating_jobs(repeats: int, queue: str, job: Callable):
     conn = Redis(QUEUE)
-    job_queue = Queue(name=queue, connection=conn)
+    job_queue = Queue(name=queue, connection=conn, default_timeout=36000)
     for _ in range(repeats):
         job_queue.enqueue(job)
 
@@ -48,8 +48,8 @@ def foreman():
     conn = Redis(QUEUE)
     foreman_respawn_time = timedelta(minutes=60)
 
-    cpu = Queue(name="cpu", connection=conn)
-    gpu = Queue(name="gpu", connection=conn)
+    cpu = Queue(name="cpu", connection=conn, default_timeout=7200)
+    gpu = Queue(name="gpu", connection=conn, default_timeout=36000)
     cpu.enqueue_in(foreman_respawn_time, foreman)
 
     if not CACHE_MOLS.exists():
