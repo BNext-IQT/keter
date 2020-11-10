@@ -53,10 +53,7 @@ def foreman():
     cpu.enqueue_in(foreman_respawn_time, foreman)
 
     if not CACHE_MOLS.exists():
-        cpu.enqueue(create_datasets)
-    else:
-        if not CACHE_FEATURES_ELE_LANG.exists():
-            cpu.enqueue(create_elemental_language)
+        cpu.enqueue(create_dataset_and_transformations)
 
     cpu.enqueue(coronavirus_cases_update)
     gpu.enqueue(chemistry_model_train)
@@ -89,7 +86,12 @@ def chemistry_discover_drugs():
     sleep(2)
 
 
-def create_datasets():
+def create_dataset_and_transformations():
+    create_dataset()
+    create_elemental_language()
+
+
+def create_dataset():
     gather_mols_with_props().to_parquet(CACHE_MOLS)
 
 
