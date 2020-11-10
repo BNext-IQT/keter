@@ -43,7 +43,7 @@ class Controller:
         queue -- What queue to listen for (eg. gpu, cpu). Use "all" to listen for anything. 
         """
         keter.foreman()
-        _work(queue)
+        _do_work(queue)
 
     def work(self, queue="all", job="", params=""):
         """
