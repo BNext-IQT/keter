@@ -34,14 +34,14 @@ def transform_elemental_language(dataset: pd.DataFrame, path: str):
             res = encoder(row.smiles)
             if not res:
                 continue
-            res = res.replace("[", " ").replace("]", "").replace("\n ", "\n").strip()
+            res = res.replace("]", "] ").replace(".", "DOT ")
             for col, val in row.items():
                 if isinstance(val, float):
                     if val == 1.0:
-                        res += str(col + "_P ")
+                        res += str(col.replace(" ", "_") + "_P ")
                     if val == 0.0:
-                        res += str(col + "_N ")
-            yield bytes(res, "utf-8")
+                        res += str(col.replace(" ", "_") + "_N ")
+            yield bytes(res.strip() + "\n", "utf-8")
 
     with gzip.open(path, "wb") as ele_file:
         ele_file.writelines(transform(dataset))
