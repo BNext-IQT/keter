@@ -46,7 +46,7 @@ def work(queue: str):
 
 def foreman():
     conn = Redis(QUEUE)
-    foreman_respawn_time = timedelta(minutes=5)
+    foreman_respawn_time = timedelta(minutes=90)
 
     cpu = Queue(name="cpu", connection=conn, default_timeout=7200)
     gpu = Queue(name="gpu", connection=conn, default_timeout=36000)
