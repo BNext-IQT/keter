@@ -87,8 +87,9 @@ def chemistry_discover_drugs():
 
 
 def create_dataset_and_transformations():
-    create_dataset()
-    create_elemental_language()
+    dataset = gather_mols_with_props()
+    transform_elemental_language(dataset, str(CACHE_FEATURES_ELE_LANG))
+    dataset.to_parquet(CACHE_MOLS)
 
 
 def create_dataset():
