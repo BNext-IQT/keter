@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package keter;
+
+message DrugCandidate {
+    string name = 1;
+    string key = 2;
+    string smiles = 3;
+
+    double drug_score = 4;
+    double safety_score = 5;
+    double manufacturability_score = 6;
+
+    message Target {
+        string name = 1;
+        double affinity = 2;
+    }
+    repeated Target targets = 7;
+
+    message Source {
+        enum Type {
+            UNKNOWN = 0;
+            MODEL = 1;
+            DATASET = 2;
+            USER = 3;
+            PAPER = 4;
+            EXPERIMENT = 5;
+            SIFTER = 6;
+        } 
+        string name = 1;
+        Type type = 2;
+        sint32 version = 3;
+        string uri = 4;
+    }
+    repeated Source sources = 8;
+}
