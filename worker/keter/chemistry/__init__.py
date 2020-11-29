@@ -1,8 +1,10 @@
 from typing import Generator, Sequence
+import gzip
 from uuid import uuid4
 import pandas as pd
 import deepchem as dc
 import selfies
+from transformers import Trainer, TrainingArguments
 
 
 def df2corpus(df: pd.DataFrame) -> Generator:
@@ -10,8 +12,19 @@ def df2corpus(df: pd.DataFrame) -> Generator:
         df.dropna(subset=["smiles"], inplace=True)
         df["smiles"] = df["smiles"].apply(selfies.encoder)
 
+class Beresheet:
+    def fit(self, dataset: str):
+        with gzip.open(dataset, "rb") as sentences:
+            for sentence in sentences:
 
-class Chemistry:
+
+
+
+        
+
+
+
+class DeepChem:
     gcm_model_version = "1"
 
     def __init__(self, path):
