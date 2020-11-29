@@ -4,7 +4,7 @@ import pandas as pd
 from selfies import encoder
 
 
-def gather_mols_with_props() -> pd.DataFrame:
+def gather_mols_with_props(with_unlabelled=False) -> pd.DataFrame:
     urls = [
         "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/tox21.csv.gz",
         "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/toxcast_data.csv.gz",
@@ -14,6 +14,16 @@ def gather_mols_with_props() -> pd.DataFrame:
         "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/pcba.csv.gz",
         "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/muv.csv.gz",
     ]
+
+    if with_unlabelled:
+        urls.append(
+            lambda: pd.read_csv(
+                "https://github.com/molecularsets/moses/raw/master/data/dataset_v1.csv",
+                names=["smiles", "partition"],
+                header=None,
+                usecols=["smiles"],
+            )
+        )
 
     def read_csv(csv) -> pd.DataFrame:
         if isinstance(csv, str):
