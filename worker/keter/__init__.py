@@ -8,8 +8,9 @@ from redis import Redis
 import redis.exceptions
 import pandas as pd
 from sqlalchemy import create_engine
-from keter.data import gather_mols_with_props, transform_elemental_language
+from keter.chemistry.data import gather_mols_with_props, transform_elemental_language
 from keter.chemistry import Chemistry
+from keter.protos.DrugCandidate_pb2 import DrugCandidate
 
 CACHE_ROOT = Path(os.environ.get("KETER_CACHE") or Path.home() / ".keter")
 CACHE_GROUND_TRUTH = CACHE_ROOT / "ground_truth"
