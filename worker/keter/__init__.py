@@ -15,7 +15,7 @@ CACHE_GROUND_TRUTH = CACHE_ROOT / "ground_truth"
 CACHE_FEATURES = CACHE_ROOT / "features"
 CACHE_MODELS = CACHE_ROOT / "models"
 CACHE_MOLS = CACHE_GROUND_TRUTH / "mols.parquet"
-CACHE_FEATURES_ELE_LANG = CACHE_FEATURES / "elemental.txt.gz"
+CACHE_FEATURES_ELE_LANG = CACHE_FEATURES / "elemental.txt.xz"
 
 CACHE_GROUND_TRUTH.mkdir(parents=True, exist_ok=True)
 CACHE_FEATURES.mkdir(exist_ok=True)

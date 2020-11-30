@@ -1,11 +1,11 @@
 from functools import reduce
-import gzip
+import lzma
 from typing import Iterable
 import pandas as pd
 
 
 def compress(filepath: str, corpus: Iterable[str]):
-    with gzip.open(filepath, "wb") as ele_file:
+    with lzma.open(filepath, "wb") as ele_file:
         ele_file.writelines(corpus)
 
 
