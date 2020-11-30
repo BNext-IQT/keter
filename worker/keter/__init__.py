@@ -8,8 +8,7 @@ from redis import Redis
 import redis.exceptions
 import pandas as pd
 from sqlalchemy import create_engine
-from keter.chemistry.data import gather_mols_with_props, transform_elemental_language
-from keter.chemistry import DeepChem
+from keter.chemistry import DeepChem, get_data, compress, transform_elemental
 
 CACHE_ROOT = Path(os.environ.get("KETER_CACHE") or Path.home() / ".keter")
 CACHE_GROUND_TRUTH = CACHE_ROOT / "ground_truth"
@@ -65,7 +64,7 @@ def coronavirus_cases_update():
 
 
 def chemistry_model_train():
-    chem = Chemistry(CACHE_MODELS)
+    chem = DeepChem(CACHE_MODELS)
     chem.fit()
 
     _queue_jobs("gpu", chemistry_infer_drugs, DRUG_DISCOVERY_JOBS_PER_MODEL)
@@ -84,19 +83,11 @@ def chemistry_infer_drugs():
     _queue_jobs("cpu", chemistry_sift_for_drugs)
 
 
+def chemistry_sift_for_drugs():
     sleep(2)
 
 
 def create_dataset_and_transformations():
-    dataset = gather_mols_with_props()
-    transform_elemental_language(dataset, str(CACHE_FEATURES_ELE_LANG))
+    dataset = get_data()
+    compress(str(CACHE_FEATURES_ELE_LANG), transform_elemental(dataset))
     dataset.to_parquet(CACHE_MOLS)
-
-
-def create_dataset():
-    gather_mols_with_props().to_parquet(CACHE_MOLS)
-
-
-def create_elemental_language():
-    dataset = pd.read_parquet(CACHE_MOLS)
-    transform_elemental_language(dataset, str(CACHE_FEATURES_ELE_LANG))
