@@ -28,7 +28,7 @@ FORECASTING_JOBS_PER_MODEL = 10
 QUEUE = os.environ.get("KETER_QUEUE") or ""
 
 
-def _queue_repeating_jobs(repeats: int, queue: str, job: Callable):
+def _queue_jobs(queue: str, job: Callable, repeats=1):
     conn = Redis(QUEUE)
     job_queue = Queue(name=queue, connection=conn, default_timeout=36000)
     for _ in range(repeats):
@@ -67,22 +67,23 @@ def coronavirus_cases_update():
 def chemistry_model_train():
     chem = Chemistry(CACHE_MODELS)
     chem.fit()
-    print(chem.score())
 
-    _queue_repeating_jobs(
-        DRUG_DISCOVERY_JOBS_PER_MODEL, "gpu", chemistry_discover_drugs
-    )
+    _queue_jobs("gpu", chemistry_infer_drugs, DRUG_DISCOVERY_JOBS_PER_MODEL)
 
 
 def forecast_model_train():
-    _queue_repeating_jobs(FORECASTING_JOBS_PER_MODEL, "gpu", forecast_cache_infer)
+    _queue_jobs(FORECASTING_JOBS_PER_MODEL, "gpu", forecast_cache_infer)
 
 
 def forecast_cache_infer():
     sleep(2)
 
 
-def chemistry_discover_drugs():
+def chemistry_infer_drugs():
+    sleep(2)
+    _queue_jobs("cpu", chemistry_sift_for_drugs)
+
+
     sleep(2)
 
 
