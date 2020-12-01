@@ -11,14 +11,12 @@ from sqlalchemy import create_engine
 from keter.chemistry import DeepChem, get_data, compress, transform_elemental
 
 CACHE_ROOT = Path(os.environ.get("KETER_CACHE") or Path.home() / ".keter")
-CACHE_GROUND_TRUTH = CACHE_ROOT / "ground_truth"
-CACHE_FEATURES = CACHE_ROOT / "features"
+CACHE_DATASET = CACHE_ROOT / "dataset"
 CACHE_MODELS = CACHE_ROOT / "models"
-CACHE_MOLS = CACHE_GROUND_TRUTH / "mols.parquet"
-CACHE_FEATURES_ELE_LANG = CACHE_FEATURES / "elemental.txt.xz"
+CACHE_MOLS = CACHE_DATASET / "original.parquet"
+CACHE_FEATURES_ELE_LANG = CACHE_DATASET / "elemental_language.txt.xz"
 
-CACHE_GROUND_TRUTH.mkdir(parents=True, exist_ok=True)
-CACHE_FEATURES.mkdir(exist_ok=True)
+CACHE_DATASET.mkdir(parents=True, exist_ok=True)
 CACHE_MODELS.mkdir(exist_ok=True)
 
 DRUG_DISCOVERY_JOBS_PER_MODEL = 10
