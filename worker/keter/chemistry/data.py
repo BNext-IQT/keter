@@ -33,12 +33,10 @@ def get_data(with_unlabelled=False):
     def read_csv(csv) -> pd.DataFrame:
         if isinstance(csv, str):
             return pd.read_csv(csv)
-        else:
-            return csv()
+        return csv()
 
     result = reduce(
         lambda left, right: pd.merge(left, right, on="smiles", how="outer", sort=False),
         (read_csv(csv) for csv in urls),
     )
-    return result[~result.smiles.str.contains("^\*|FAIL")]
-
+    return result[~result.smiles.str.contains(r"^\*|FAIL")].reset_index(drop=True)
