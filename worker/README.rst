@@ -3,7 +3,8 @@ Keter Worker
 
 This Python project executes jobs for various tasks in coronavirus and biosecurity science.
 
-Jobs may includine:
+Jobs may include:
+
 * Training or refining antivirial models
 * Train or refining forecasting models
 * Inference using trained models
