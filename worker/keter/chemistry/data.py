@@ -1,15 +1,9 @@
 from functools import reduce
-import lzma
-from typing import Iterable
 import pandas as pd
 
 
-def compress(filepath: str, corpus: Iterable[str]):
-    with lzma.open(filepath, "wb") as ele_file:
-        ele_file.writelines(corpus)
-
-
 def get_data(with_unlabelled=False):
+
     urls = [
         "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/tox21.csv.gz",
         "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/toxcast_data.csv.gz",

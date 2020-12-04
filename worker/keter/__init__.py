@@ -8,13 +8,13 @@ from redis import Redis
 import redis.exceptions
 import pandas as pd
 from sqlalchemy import create_engine
-from keter.chemistry import DeepChem, get_data, compress, transform_elemental
+from keter.chemistry import DeepChem, get_data, save_corpus, transform_elemental
 
 CACHE_ROOT = Path(os.environ.get("KETER_CACHE") or Path.home() / ".keter")
 CACHE_DATASET = CACHE_ROOT / "dataset"
 CACHE_MODELS = CACHE_ROOT / "models"
 CACHE_MOLS = CACHE_DATASET / "original.parquet"
-CACHE_FEATURES_ELE_LANG = CACHE_DATASET / "elemental_language.txt.xz"
+CACHE_FEATURES_ELE_LANG = CACHE_DATASET / "elemental_language.pickle.xz"
 
 CACHE_DATASET.mkdir(parents=True, exist_ok=True)
 CACHE_MODELS.mkdir(exist_ok=True)
@@ -87,5 +87,5 @@ def chemistry_sift_for_drugs():
 
 def create_dataset_and_transformations():
     dataset = get_data()
-    compress(str(CACHE_FEATURES_ELE_LANG), transform_elemental(dataset))
+    save_corpus(str(CACHE_FEATURES_ELE_LANG), transform_elemental(dataset))
     dataset.to_parquet(CACHE_MOLS)
