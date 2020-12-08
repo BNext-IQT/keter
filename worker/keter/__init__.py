@@ -8,7 +8,14 @@ from redis import Redis
 import redis.exceptions
 import pandas as pd
 from sqlalchemy import create_engine
-from keter.chemistry import DeepChem, get_data, save_corpus, transform_elemental
+from keter.chemistry import (
+    DeepChem,
+    get_data,
+    save_corpus,
+    read_corpus,
+    transform_elemental,
+    Serenity,
+)
 
 CACHE_ROOT = Path(os.environ.get("KETER_CACHE") or Path.home() / ".keter")
 CACHE_DATASET = CACHE_ROOT / "dataset"
@@ -61,7 +68,13 @@ def coronavirus_cases_update():
     sleep(2)
 
 
-def chemistry_model_train():
+def chemistry_rage_and_serenity_train():
+    corpus = read_corpus(CACHE_FEATURES_ELE_LANG)
+    serenity = Serenity()
+    serenity.fit(corpus, CACHE_MODELS)
+
+
+def chemistry_gcn_train():
     chem = DeepChem(CACHE_MODELS)
     chem.fit()
 
