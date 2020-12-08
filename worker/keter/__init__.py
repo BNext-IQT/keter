@@ -8,18 +8,22 @@ from redis import Redis
 import redis.exceptions
 import pandas as pd
 from sqlalchemy import create_engine
-from keter.chemistry.data import gather_mols_with_props, transform_elemental_language
-from keter.chemistry import DeepChem
+from keter.chemistry import (
+    DeepChem,
+    get_data,
+    save_corpus,
+    read_corpus,
+    transform_elemental,
+    Serenity,
+)
 
 CACHE_ROOT = Path(os.environ.get("KETER_CACHE") or Path.home() / ".keter")
-CACHE_GROUND_TRUTH = CACHE_ROOT / "ground_truth"
-CACHE_FEATURES = CACHE_ROOT / "features"
+CACHE_DATASET = CACHE_ROOT / "dataset"
 CACHE_MODELS = CACHE_ROOT / "models"
-CACHE_MOLS = CACHE_GROUND_TRUTH / "mols.parquet"
-CACHE_FEATURES_ELE_LANG = CACHE_FEATURES / "elemental.txt.gz"
+CACHE_MOLS = CACHE_DATASET / "original.parquet"
+CACHE_FEATURES_ELE_LANG = CACHE_DATASET / "elemental_language.pickle.xz"
 
-CACHE_GROUND_TRUTH.mkdir(parents=True, exist_ok=True)
-CACHE_FEATURES.mkdir(exist_ok=True)
+CACHE_DATASET.mkdir(parents=True, exist_ok=True)
 CACHE_MODELS.mkdir(exist_ok=True)
 
 DRUG_DISCOVERY_JOBS_PER_MODEL = 10
@@ -28,7 +32,7 @@ FORECASTING_JOBS_PER_MODEL = 10
 QUEUE = os.environ.get("KETER_QUEUE") or ""
 
 
-def _queue_repeating_jobs(repeats: int, queue: str, job: Callable):
+def _queue_jobs(queue: str, job: Callable, repeats=1):
     conn = Redis(QUEUE)
     job_queue = Queue(name=queue, connection=conn, default_timeout=36000)
     for _ in range(repeats):
@@ -64,38 +68,37 @@ def coronavirus_cases_update():
     sleep(2)
 
 
-def chemistry_model_train():
-    chem = Chemistry(CACHE_MODELS)
-    chem.fit()
-    print(chem.score())
+def chemistry_rage_and_serenity_train():
+    corpus = read_corpus(CACHE_FEATURES_ELE_LANG)
+    serenity = Serenity()
+    serenity.fit(corpus, CACHE_MODELS)
 
-    _queue_repeating_jobs(
-        DRUG_DISCOVERY_JOBS_PER_MODEL, "gpu", chemistry_discover_drugs
-    )
+
+def chemistry_gcn_train():
+    chem = DeepChem(CACHE_MODELS)
+    chem.fit()
+
+    _queue_jobs("gpu", chemistry_infer_drugs, DRUG_DISCOVERY_JOBS_PER_MODEL)
 
 
 def forecast_model_train():
-    _queue_repeating_jobs(FORECASTING_JOBS_PER_MODEL, "gpu", forecast_cache_infer)
+    _queue_jobs(FORECASTING_JOBS_PER_MODEL, "gpu", forecast_cache_infer)
 
 
 def forecast_cache_infer():
     sleep(2)
 
 
-def chemistry_discover_drugs():
+def chemistry_infer_drugs():
+    sleep(2)
+    _queue_jobs("cpu", chemistry_sift_for_drugs)
+
+
+def chemistry_sift_for_drugs():
     sleep(2)
 
 
 def create_dataset_and_transformations():
-    dataset = gather_mols_with_props()
-    transform_elemental_language(dataset, str(CACHE_FEATURES_ELE_LANG))
+    dataset = get_data()
+    save_corpus(str(CACHE_FEATURES_ELE_LANG), transform_elemental(dataset))
     dataset.to_parquet(CACHE_MOLS)
-
-
-def create_dataset():
-    gather_mols_with_props().to_parquet(CACHE_MOLS)
-
-
-def create_elemental_language():
-    dataset = pd.read_parquet(CACHE_MOLS)
-    transform_elemental_language(dataset, str(CACHE_FEATURES_ELE_LANG))
