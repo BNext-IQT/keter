@@ -3,19 +3,27 @@ syntax = "proto3";
 package keter;
 
 message DrugCandidate {
+    // Metadata
     string name = 1;
     string key = 2;
     string smiles = 3;
 
+    // Scores
     double drug_score = 4;
     double safety_score = 5;
     double manufacturability_score = 6;
+
+    // Properties
+    double mass = 7;
+    double logp = 8;
+    uint32 hydrogen_acceptors = 9;
+    uint32 hydrogen_donors = 10;
 
     message Target {
         string name = 1;
         double affinity = 2;
     }
-    repeated Target targets = 7;
+    repeated Target targets = 11;
 
     message Source {
         enum Type {
@@ -29,8 +37,8 @@ message DrugCandidate {
         } 
         string name = 1;
         Type type = 2;
-        sint32 version = 3;
+        uint32 version = 3;
         string uri = 4;
     }
-    repeated Source sources = 8;
+    repeated Source sources = 12;
 }

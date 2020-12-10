@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x13\x44rugCandidate.proto\x12\x05keter\"\xd0\x03\n\rDrugCandidate\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0b\n\x03key\x18\x02 \x01(\t\x12\x0e\n\x06smiles\x18\x03 \x01(\t\x12\x12\n\ndrug_score\x18\x04 \x01(\x01\x12\x14\n\x0csafety_score\x18\x05 \x01(\x01\x12\x1f\n\x17manufacturability_score\x18\x06 \x01(\x01\x12,\n\x07targets\x18\x07 \x03(\x0b\x32\x1b.keter.DrugCandidate.Target\x12,\n\x07sources\x18\x08 \x03(\x0b\x32\x1b.keter.DrugCandidate.Source\x1a(\n\x06Target\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x10\n\x08\x61\x66\x66inity\x18\x02 \x01(\x01\x1a\xc2\x01\n\x06Source\x12\x0c\n\x04name\x18\x01 \x01(\t\x12.\n\x04type\x18\x02 \x01(\x0e\x32 .keter.DrugCandidate.Source.Type\x12\x0f\n\x07version\x18\x03 \x01(\x11\x12\x0b\n\x03uri\x18\x04 \x01(\t\"\\\n\x04Type\x12\x0b\n\x07UNKNOWN\x10\x00\x12\t\n\x05MODEL\x10\x01\x12\x0b\n\x07\x44\x41TASET\x10\x02\x12\x08\n\x04USER\x10\x03\x12\t\n\x05PAPER\x10\x04\x12\x0e\n\nEXPERIMENT\x10\x05\x12\n\n\x06SIFTER\x10\x06\x62\x06proto3'
+  serialized_pb=b'\n\x13\x44rugCandidate.proto\x12\x05keter\"\xa1\x04\n\rDrugCandidate\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0b\n\x03key\x18\x02 \x01(\t\x12\x0e\n\x06smiles\x18\x03 \x01(\t\x12\x12\n\ndrug_score\x18\x04 \x01(\x01\x12\x14\n\x0csafety_score\x18\x05 \x01(\x01\x12\x1f\n\x17manufacturability_score\x18\x06 \x01(\x01\x12\x0c\n\x04mass\x18\x07 \x01(\x01\x12\x0c\n\x04logp\x18\x08 \x01(\x01\x12\x1a\n\x12hydrogen_acceptors\x18\t \x01(\r\x12\x17\n\x0fhydrogen_donors\x18\n \x01(\r\x12,\n\x07targets\x18\x0b \x03(\x0b\x32\x1b.keter.DrugCandidate.Target\x12,\n\x07sources\x18\x0c \x03(\x0b\x32\x1b.keter.DrugCandidate.Source\x1a(\n\x06Target\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x10\n\x08\x61\x66\x66inity\x18\x02 \x01(\x01\x1a\xc2\x01\n\x06Source\x12\x0c\n\x04name\x18\x01 \x01(\t\x12.\n\x04type\x18\x02 \x01(\x0e\x32 .keter.DrugCandidate.Source.Type\x12\x0f\n\x07version\x18\x03 \x01(\r\x12\x0b\n\x03uri\x18\x04 \x01(\t\"\\\n\x04Type\x12\x0b\n\x07UNKNOWN\x10\x00\x12\t\n\x05MODEL\x10\x01\x12\x0b\n\x07\x44\x41TASET\x10\x02\x12\x08\n\x04USER\x10\x03\x12\t\n\x05PAPER\x10\x04\x12\x0e\n\nEXPERIMENT\x10\x05\x12\n\n\x06SIFTER\x10\x06\x62\x06proto3'
 )
 
 
@@ -69,8 +69,8 @@ _DRUGCANDIDATE_SOURCE_TYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=403,
-  serialized_end=495,
+  serialized_start=484,
+  serialized_end=576,
 )
 _sym_db.RegisterEnumDescriptor(_DRUGCANDIDATE_SOURCE_TYPE)
 
@@ -109,8 +109,8 @@ _DRUGCANDIDATE_TARGET = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=258,
-  serialized_end=298,
+  serialized_start=339,
+  serialized_end=379,
 )
 
 _DRUGCANDIDATE_SOURCE = _descriptor.Descriptor(
@@ -137,7 +137,7 @@ _DRUGCANDIDATE_SOURCE = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='version', full_name='keter.DrugCandidate.Source.version', index=2,
-      number=3, type=17, cpp_type=1, label=1,
+      number=3, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -162,8 +162,8 @@ _DRUGCANDIDATE_SOURCE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=301,
-  serialized_end=495,
+  serialized_start=382,
+  serialized_end=576,
 )
 
 _DRUGCANDIDATE = _descriptor.Descriptor(
@@ -217,15 +217,43 @@ _DRUGCANDIDATE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='targets', full_name='keter.DrugCandidate.targets', index=6,
-      number=7, type=11, cpp_type=10, label=3,
+      name='mass', full_name='keter.DrugCandidate.mass', index=6,
+      number=7, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='logp', full_name='keter.DrugCandidate.logp', index=7,
+      number=8, type=1, cpp_type=5, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='hydrogen_acceptors', full_name='keter.DrugCandidate.hydrogen_acceptors', index=8,
+      number=9, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='hydrogen_donors', full_name='keter.DrugCandidate.hydrogen_donors', index=9,
+      number=10, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='targets', full_name='keter.DrugCandidate.targets', index=10,
+      number=11, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='sources', full_name='keter.DrugCandidate.sources', index=7,
-      number=8, type=11, cpp_type=10, label=3,
+      name='sources', full_name='keter.DrugCandidate.sources', index=11,
+      number=12, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -243,7 +271,7 @@ _DRUGCANDIDATE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=31,
-  serialized_end=495,
+  serialized_end=576,
 )
 
 _DRUGCANDIDATE_TARGET.containing_type = _DRUGCANDIDATE
