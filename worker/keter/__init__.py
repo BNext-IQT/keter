@@ -9,7 +9,7 @@ import redis.exceptions
 import pandas as pd
 from sqlalchemy import create_engine
 from keter.chemistry import (
-    DeepChem,
+    GraphConvModelAnalyzer,
     get_data,
     save_corpus,
     read_corpus,
@@ -61,7 +61,7 @@ def chemistry_rage_and_serenity_train():
 
 
 def chemistry_gcn_train():
-    chem = DeepChem(CACHE_MODELS)
+    chem = GraphConvModelAnalyzer(CACHE_MODELS)
     chem.fit()
 
     _queue_jobs("gpu", chemistry_infer_drugs, DRUG_DISCOVERY_JOBS_PER_MODEL)
@@ -86,5 +86,5 @@ def chemistry_sift_for_drugs():
 
 def create_dataset_and_transformations():
     dataset = get_data()
-    save_corpus(str(CACHE_FEATURES_ELE_LANG), transform_elemental(dataset))
+    save_corpus(str(CACHE_FLAIR_CORPUS), transform_elemental(dataset))
     dataset.to_parquet(CACHE_MOLS)

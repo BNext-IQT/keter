@@ -1,6 +1,7 @@
 from typing import Iterable
 import lzma
 import pickle
+import pandas as pd
 from flair.models.text_classification_model import TARSClassifier
 from flair.trainers import ModelTrainer
 from flair.data import Sentence, Corpus, Token
@@ -51,7 +52,7 @@ def transform_elemental(dataset: pd.DataFrame) -> Corpus:
     return Corpus(train, dev, test, "Molecules")
 
 
-class TARS:
+class TARSAnalyzer:
     def fit(self, corpus: Corpus, model_path: str):
         self.model = TARSClassifier(
             task_name="ChemicalUnderstanding",
