@@ -9,27 +9,13 @@ import redis.exceptions
 import pandas as pd
 from sqlalchemy import create_engine
 from keter.chemistry import (
-    DeepChem,
+    GraphConvModelAnalyzer,
     get_data,
     save_corpus,
     read_corpus,
     transform_elemental,
-    Serenity,
 )
-
-CACHE_ROOT = Path(os.environ.get("KETER_CACHE") or Path.home() / ".keter")
-CACHE_DATASET = CACHE_ROOT / "dataset"
-CACHE_MODELS = CACHE_ROOT / "models"
-CACHE_MOLS = CACHE_DATASET / "original.parquet"
-CACHE_FEATURES_ELE_LANG = CACHE_DATASET / "elemental_language.pickle.xz"
-
-CACHE_DATASET.mkdir(parents=True, exist_ok=True)
-CACHE_MODELS.mkdir(exist_ok=True)
-
-DRUG_DISCOVERY_JOBS_PER_MODEL = 10
-FORECASTING_JOBS_PER_MODEL = 10
-
-QUEUE = os.environ.get("KETER_QUEUE") or ""
+from keter.config import *
 
 
 def _queue_jobs(queue: str, job: Callable, repeats=1):
@@ -75,7 +61,7 @@ def chemistry_rage_and_serenity_train():
 
 
 def chemistry_gcn_train():
-    chem = DeepChem(CACHE_MODELS)
+    chem = GraphConvModelAnalyzer(CACHE_MODELS)
     chem.fit()
 
     _queue_jobs("gpu", chemistry_infer_drugs, DRUG_DISCOVERY_JOBS_PER_MODEL)
@@ -100,5 +86,5 @@ def chemistry_sift_for_drugs():
 
 def create_dataset_and_transformations():
     dataset = get_data()
-    save_corpus(str(CACHE_FEATURES_ELE_LANG), transform_elemental(dataset))
+    save_corpus(str(CACHE_FLAIR_CORPUS), transform_elemental(dataset))
     dataset.to_parquet(CACHE_MOLS)

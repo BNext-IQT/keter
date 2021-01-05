@@ -64,6 +64,8 @@ setup(
         "selfies",
         "fire",
         "flair",
+        "betterproto[compiler]",
+        "flask",
         "deepchem>=2.4.0rc1.dev20201021184017",
         "tensorflow>=2.3",
     ],

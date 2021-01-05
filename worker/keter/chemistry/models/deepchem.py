@@ -12,7 +12,7 @@ def df2corpus(df: pd.DataFrame) -> Generator:
         df["smiles"] = df["smiles"].apply(selfies.encoder)
 
 
-class DeepChem:
+class GraphConvModelAnalyzer:
     gcm_model_version = "1"
 
     def __init__(self, path):
