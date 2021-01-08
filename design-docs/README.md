@@ -9,7 +9,7 @@ This document describes the common machine learning architecture used in Keter.
 Machine learning models that take in raw processed data. Models need not include any preprocessors needed to create the tensor or other data structures actually used by the model, but can implement them as separate ``Transformer`` layers. Models need not be polymorphic, although should expose a similar interface if reasonably possible. Models should contain no code that commits to the cache, and any codepaths that involve writing to files must be configurable.
 
 #### Actors
-Actors are modules that include models and datasets, and one or more hyperparamter sets. Actors should be implemented using the Ray actor toolkit. Actors are allowed to commit to the cache.
+Actors are modules that include one model, a dataset it is trained on, and one or more hyperparamter sets. Actors should be implemented using the Ray actor toolkit. Actors are allowed to commit to the cache.
 
 #### Systems
 Systems are modules that include one or more actors. The output of a system is always the product in question, which is implemented as a generator of a Protocol Buffer (``DrugCandidate``, ``Forecasts``). For example, a system for drug discovery should implement a ``iterdrugs`` method which returns a generator for ``DrugCandidate``s. Systems should not commit to the cache directly, but Actors they include may do so commit, so using a System may modify the cache.
