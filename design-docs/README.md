@@ -1,4 +1,4 @@
-Keter is a biosecurity project to build out the different software parts for addressing a pandemic, with an eye on artificial intelligent solutions. Right now it focuses on small molecule antivirals and forecasting. It may move in other directions as new ideas come.
+Keter is a health intelligence platform for addressing a pandemic with an eye on artificial intelligent solutions. Right now it focuses on small molecule antivirals and forecasting. It may move in other directions as new ideas come.
 
 This document describes the architecture and design of the Keter system. Keter is still a concept project and things may change suddenly.
 
@@ -27,6 +27,8 @@ dataframe = mols(cache='required')
 ```
 #### Cache
 The cache is a Git repository who's location is set the environment variable ``$KETER_CACHE`` or ``~/.keter`` if not specified. DataFrames, Model files, and other objects are stored in this repository.
+
+We are currently investigating [Data Version Control](https://dvc.org/).
 
 #### Driver
 A Driver uses a system to produce a Product, which can be a Report or a changeset for a Database.
