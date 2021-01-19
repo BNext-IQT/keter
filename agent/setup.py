@@ -12,6 +12,14 @@ except ImportError:
     print("ERROR!")
     print("ERROR: RDKit not found. It is required and must be installed seperately.")
     print("See: https://www.rdkit.org/docs/Install.html")
+    try:
+        import conda
+
+        print("")
+        print("Since you have conda installed, you might want to try:")
+        print("  conda install -c conda-forge rdkit")
+    except:
+        pass
     exit(-1)
 print("SUCCESS!")
 
