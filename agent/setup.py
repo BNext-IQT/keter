@@ -78,6 +78,10 @@ setup(
         "tensorflow>=2.3",
     ],
     tests_require=["pytest"],
-    entry_points={"console_scripts": ["keter = keter.__main__:main",],},
+    entry_points={
+        "console_scripts": [
+            "keter = keter.__main__:main",
+        ],
+    },
     cmdclass={"test": PyTest},
 )
