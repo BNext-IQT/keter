@@ -12,6 +12,14 @@ except ImportError:
     print("ERROR!")
     print("ERROR: RDKit not found. It is required and must be installed seperately.")
     print("See: https://www.rdkit.org/docs/Install.html")
+    try:
+        import conda
+
+        print("")
+        print("Since you have conda installed, you might want to try:")
+        print("  conda install -c conda-forge rdkit")
+    except:
+        pass
     exit(-1)
 print("SUCCESS!")
 
@@ -57,19 +65,24 @@ setup(
     ],
     packages=find_packages(),
     install_requires=[
-        "redis",
-        "SQLAlchemy",
+        "protobuf<4.0.0",
+        "jinja2<3.0.0",
+        "betterproto[compiler]",
         "pyarrow",
         "selfies",
         "fire",
         "flair",
         "ray",
-        "betterproto[compiler]",
+        "dvc[s3]",
         "flask",
-        "deepchem>=2.4.0rc1.dev20201021184017",
-        "tensorflow>=2.3",
+        "deepchem",
+        "tensorflow==2.3.*",
     ],
     tests_require=["pytest"],
-    entry_points={"console_scripts": ["keter = keter.__main__:main",],},
+    entry_points={
+        "console_scripts": [
+            "keter = keter.__main__:main",
+        ],
+    },
     cmdclass={"test": PyTest},
 )
