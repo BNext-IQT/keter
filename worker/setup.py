@@ -64,6 +64,7 @@ setup(
         "selfies",
         "fire",
         "flair",
+        "ray",
         "betterproto[compiler]",
         "flask",
         "deepchem>=2.4.0rc1.dev20201021184017",
