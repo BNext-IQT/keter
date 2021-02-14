@@ -22,7 +22,16 @@ class Toxicity(ConstructedData):
     filename = "toxicity"
 
     def construct(self) -> pd.DataFrame:
-        return self._normalize_tox(Tox21()()).copy()
+        dataframe = pd.merge(
+            self._normalize_tox(Tox21()()),
+            self._normalize_tox(ToxCast()()),
+            on="smiles",
+            how="outer",
+            sort=False,
+        )
+        dataframe["toxicity"] = dataframe[["toxicity_x", "toxicity_y"]].mean(axis=1)
+        dataframe = dataframe.drop(["toxicity_x", "toxicity_y"], axis=1)
+        return dataframe.reset_index(drop=True).copy()
 
     def _normalize_tox(self, dataframe: pd.DataFrame) -> pd.DataFrame:
         dataframe["toxicity"] = dataframe.sum(axis=1)
