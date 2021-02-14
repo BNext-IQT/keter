@@ -1,6 +1,6 @@
 from functools import reduce
 import pandas as pd
-from keter.cache import cache, CACHE_ROOT
+from keter.cache import CACHE_ROOT
 
 RAW_DATA_PATH = CACHE_ROOT / "data" / "raw"
 RAW_DATA_PATH.mkdir(parents=True, exist_ok=True)
@@ -12,16 +12,17 @@ class RawData:
         if parquet_file.exists() and not override:
             dataframe = pd.read_parquet(parquet_file)
         else:
-            self.download()
+            dataframe = self.download()
             dataframe.to_parquet(parquet_file)
         return dataframe
 
-    def download(self):
+    def download(self) -> pd.DataFrame:
         # All raw data uses CSV at this time
         if ".csv" in self.url:
-            self.dataframe = pd.read_csv(self.url)
+            dataframe = pd.read_csv(self.url)
         else:
             raise EnvironmentError("Only CSV is supported for raw data.")
+        return dataframe
 
 
 class Tox21(RawData):
