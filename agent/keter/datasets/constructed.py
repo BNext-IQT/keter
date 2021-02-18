@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from keter.cache import CACHE_ROOT
-from keter.datasets.raw import Tox21, ToxCast
+from keter.datasets.raw import Tox21, ToxCast, Moses
 
 CONSTRUCTED_DATA_PATH = CACHE_ROOT / "data" / "constructed"
 CONSTRUCTED_DATA_PATH.mkdir(parents=True, exist_ok=True)
@@ -42,3 +42,11 @@ class Toxicity(ConstructedData):
         dataframe["toxicity"] = dataframe["toxicity"] ** (1 / 3) / np.cbrt(max_val)
 
         return dataframe[["smiles", "toxicity"]]
+
+
+class Unlabeled(ConstructedData):
+    filename = "unlabeled"
+
+    def construct(self) -> pd.DataFrame:
+        dataframe = Moses()()[["SMILES"]].rename(columns={"SMILES": "smiles"})
+        return dataframe
