@@ -12,7 +12,7 @@ class ConstructedData:
         if parquet_file.exists():
             dataframe = pd.read_parquet(parquet_file)
         else:
-            dataframe = self.construct()
+            dataframe = self.construct(cache)
             if cache:
                 CONSTRUCTED_DATA_PATH.mkdir(parents=True, exist_ok=True)
                 dataframe.to_parquet(parquet_file)
@@ -22,10 +22,10 @@ class ConstructedData:
 class Toxicity(ConstructedData):
     filename = "toxicity"
 
-    def construct(self) -> pd.DataFrame:
+    def construct(self, cache) -> pd.DataFrame:
         dataframe = pd.merge(
-            self._normalize_tox(Tox21()()),
-            self._normalize_tox(ToxCast()()),
+            self._normalize_tox(Tox21()(cache)),
+            self._normalize_tox(ToxCast()(cache)),
             on="smiles",
             how="outer",
             sort=False,
@@ -47,18 +47,18 @@ class Toxicity(ConstructedData):
 class Unlabeled(ConstructedData):
     filename = "unlabeled"
 
-    def construct(self) -> pd.DataFrame:
+    def construct(self, cache) -> pd.DataFrame:
         dataframe = (
             pd.concat(
                 [
-                    Moses()()[["SMILES"]].rename(columns={"SMILES": "smiles"}),
-                    ToxCast()()[["smiles"]],
-                    Tox21()()[["smiles"]],
-                    Bbbp()()[["smiles"]],
-                    Muv()()[["smiles"]],
-                    Sider()()[["smiles"]],
-                    ClinTox()()[["smiles"]],
-                    Pcba()()[["smiles"]],
+                    Moses()(cache)[["SMILES"]].rename(columns={"SMILES": "smiles"}),
+                    ToxCast()(cache)[["smiles"]],
+                    Tox21()(cache)[["smiles"]],
+                    Bbbp()(cache)[["smiles"]],
+                    Muv()(cache)[["smiles"]],
+                    Sider()(cache)[["smiles"]],
+                    ClinTox()(cache)[["smiles"]],
+                    Pcba()(cache)[["smiles"]],
                 ]
             )
             .drop_duplicates()
