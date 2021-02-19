@@ -9,7 +9,7 @@ CONSTRUCTED_DATA_PATH = CACHE_ROOT / "data" / "constructed"
 class ConstructedData:
     def __call__(self, cache=False) -> pd.DataFrame:
         parquet_file = (CONSTRUCTED_DATA_PATH / self.filename).with_suffix(".parquet")
-        if parquet_file.exists() and cache:
+        if parquet_file.exists():
             dataframe = pd.read_parquet(parquet_file)
         else:
             dataframe = self.construct()

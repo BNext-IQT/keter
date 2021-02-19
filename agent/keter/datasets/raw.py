@@ -8,7 +8,7 @@ RAW_DATA_PATH = CACHE_ROOT / "data" / "raw"
 class RawData:
     def __call__(self, cache=True) -> pd.DataFrame:
         parquet_file = (RAW_DATA_PATH / self.filename).with_suffix(".parquet")
-        if parquet_file.exists() and cache:
+        if parquet_file.exists():
             dataframe = pd.read_parquet(parquet_file)
         else:
             dataframe = self.download()
