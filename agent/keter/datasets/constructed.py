@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from keter.cache import CACHE_ROOT
-from keter.datasets.raw import Tox21, ToxCast, Moses
+from keter.datasets.raw import Tox21, ToxCast, Moses, Bbbp, Muv, ClinTox, Pcba, Sider
 
 CONSTRUCTED_DATA_PATH = CACHE_ROOT / "data" / "constructed"
 CONSTRUCTED_DATA_PATH.mkdir(parents=True, exist_ok=True)
@@ -48,5 +48,20 @@ class Unlabeled(ConstructedData):
     filename = "unlabeled"
 
     def construct(self) -> pd.DataFrame:
-        dataframe = Moses()()[["SMILES"]].rename(columns={"SMILES": "smiles"})
+        dataframe = (
+            pd.concat(
+                [
+                    Moses()()[["SMILES"]].rename(columns={"SMILES": "smiles"}),
+                    ToxCast()()[["smiles"]],
+                    Tox21()()[["smiles"]],
+                    Bbbp()()[["smiles"]],
+                    Muv()()[["smiles"]],
+                    Sider()()[["smiles"]],
+                    ClinTox()()[["smiles"]],
+                    Pcba()()[["smiles"]],
+                ]
+            )
+            .drop_duplicates()
+            .reset_index(drop=True)
+        )
         return dataframe
