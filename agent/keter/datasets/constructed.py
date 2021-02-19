@@ -4,7 +4,6 @@ from keter.cache import CACHE_ROOT
 from keter.datasets.raw import Tox21, ToxCast, Moses, Bbbp, Muv, ClinTox, Pcba, Sider
 
 CONSTRUCTED_DATA_PATH = CACHE_ROOT / "data" / "constructed"
-CONSTRUCTED_DATA_PATH.mkdir(parents=True, exist_ok=True)
 
 
 class ConstructedData:
@@ -15,6 +14,7 @@ class ConstructedData:
         else:
             dataframe = self.construct()
             if cache:
+                CONSTRUCTED_DATA_PATH.mkdir(parents=True, exist_ok=True)
                 dataframe.to_parquet(parquet_file)
         return dataframe
 

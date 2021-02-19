@@ -3,7 +3,6 @@ import pandas as pd
 from keter.cache import CACHE_ROOT
 
 RAW_DATA_PATH = CACHE_ROOT / "data" / "raw"
-RAW_DATA_PATH.mkdir(parents=True, exist_ok=True)
 
 
 class RawData:
@@ -14,6 +13,7 @@ class RawData:
         else:
             dataframe = self.download()
             if cache:
+                RAW_DATA_PATH.mkdir(parents=True, exist_ok=True)
                 dataframe.to_parquet(parquet_file)
         return dataframe
 
