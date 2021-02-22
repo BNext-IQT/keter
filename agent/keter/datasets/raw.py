@@ -3,17 +3,18 @@ import pandas as pd
 from keter.cache import CACHE_ROOT
 
 RAW_DATA_PATH = CACHE_ROOT / "data" / "raw"
-RAW_DATA_PATH.mkdir(parents=True, exist_ok=True)
 
 
 class RawData:
-    def __call__(self, override=False) -> pd.DataFrame:
+    def __call__(self, cache=True) -> pd.DataFrame:
         parquet_file = (RAW_DATA_PATH / self.filename).with_suffix(".parquet")
-        if parquet_file.exists() and not override:
+        if parquet_file.exists():
             dataframe = pd.read_parquet(parquet_file)
         else:
             dataframe = self.download()
-            dataframe.to_parquet(parquet_file)
+            if cache:
+                RAW_DATA_PATH.mkdir(parents=True, exist_ok=True)
+                dataframe.to_parquet(parquet_file)
         return dataframe
 
     def download(self) -> pd.DataFrame:

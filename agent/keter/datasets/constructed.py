@@ -1,20 +1,20 @@
 import pandas as pd
 import numpy as np
 from keter.cache import CACHE_ROOT
-from keter.datasets.raw import Tox21, ToxCast
+from keter.datasets.raw import Tox21, ToxCast, Moses, Bbbp, Muv, ClinTox, Pcba, Sider
 
 CONSTRUCTED_DATA_PATH = CACHE_ROOT / "data" / "constructed"
-CONSTRUCTED_DATA_PATH.mkdir(parents=True, exist_ok=True)
 
 
 class ConstructedData:
     def __call__(self, cache=False) -> pd.DataFrame:
         parquet_file = (CONSTRUCTED_DATA_PATH / self.filename).with_suffix(".parquet")
-        if parquet_file.exists() and cache:
+        if parquet_file.exists():
             dataframe = pd.read_parquet(parquet_file)
         else:
-            dataframe = self.construct()
+            dataframe = self.construct(cache)
             if cache:
+                CONSTRUCTED_DATA_PATH.mkdir(parents=True, exist_ok=True)
                 dataframe.to_parquet(parquet_file)
         return dataframe
 
@@ -22,10 +22,10 @@ class ConstructedData:
 class Toxicity(ConstructedData):
     filename = "toxicity"
 
-    def construct(self) -> pd.DataFrame:
+    def construct(self, cache) -> pd.DataFrame:
         dataframe = pd.merge(
-            self._normalize_tox(Tox21()()),
-            self._normalize_tox(ToxCast()()),
+            self._normalize_tox(Tox21()(cache)),
+            self._normalize_tox(ToxCast()(cache)),
             on="smiles",
             how="outer",
             sort=False,
@@ -42,3 +42,26 @@ class Toxicity(ConstructedData):
         dataframe["toxicity"] = dataframe["toxicity"] ** (1 / 3) / np.cbrt(max_val)
 
         return dataframe[["smiles", "toxicity"]]
+
+
+class Unlabeled(ConstructedData):
+    filename = "unlabeled"
+
+    def construct(self, cache) -> pd.DataFrame:
+        dataframe = (
+            pd.concat(
+                [
+                    Moses()(cache)[["SMILES"]].rename(columns={"SMILES": "smiles"}),
+                    ToxCast()(cache)[["smiles"]],
+                    Tox21()(cache)[["smiles"]],
+                    Bbbp()(cache)[["smiles"]],
+                    Muv()(cache)[["smiles"]],
+                    Sider()(cache)[["smiles"]],
+                    ClinTox()(cache)[["smiles"]],
+                    Pcba()(cache)[["smiles"]],
+                ]
+            )
+            .drop_duplicates()
+            .reset_index(drop=True)
+        )
+        return dataframe
