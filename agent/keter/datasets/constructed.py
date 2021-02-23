@@ -1,20 +1,20 @@
 import pandas as pd
 import numpy as np
-from keter.cache import CACHE_ROOT
+from keter.cache import DATA_ROOT
 from keter.datasets.raw import Tox21, ToxCast, Moses, Bbbp, Muv, ClinTox, Pcba, Sider
 
-CONSTRUCTED_DATA_PATH = CACHE_ROOT / "data" / "constructed"
+CONSTRUCTED_DATA_ROOT = DATA_ROOT / "constructed"
 
 
 class ConstructedData:
     def __call__(self, cache=False) -> pd.DataFrame:
-        parquet_file = (CONSTRUCTED_DATA_PATH / self.filename).with_suffix(".parquet")
+        parquet_file = (CONSTRUCTED_DATA_ROOT / self.filename).with_suffix(".parquet")
         if parquet_file.exists():
             dataframe = pd.read_parquet(parquet_file)
         else:
             dataframe = self.construct(cache)
             if cache:
-                CONSTRUCTED_DATA_PATH.mkdir(parents=True, exist_ok=True)
+                CONSTRUCTED_DATA_ROOT.mkdir(parents=True, exist_ok=True)
                 dataframe.to_parquet(parquet_file)
         return dataframe
 
