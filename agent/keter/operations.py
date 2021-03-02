@@ -1,3 +1,4 @@
+from typing import Sequence, Generator
 import numpy as np
 import cython
 
@@ -44,3 +45,8 @@ def smiles2lang(smiles: str) -> str:
     if maybe_bromine:
         res.append("B")
     return " ".join(res)
+
+
+def generate_smiles2lang(smiles_seq: Sequence[str]) -> Generator[str, None, None]:
+    for smiles in smiles_seq:
+        yield smiles2lang(smiles)
