@@ -6,7 +6,7 @@ RAW_DATA_ROOT = DATA_ROOT / "raw"
 
 
 class RawData:
-    def __call__(self, cache=True) -> pd.DataFrame:
+    def to_df(self, cache=True) -> pd.DataFrame:
         parquet_file = (RAW_DATA_ROOT / self.filename).with_suffix(".parquet")
         if parquet_file.exists():
             dataframe = pd.read_parquet(parquet_file)
