@@ -63,7 +63,7 @@ class ChemicalLanguageHyperparameters:
         return hp
 
 
-class ChemicalLanguage:
+class ChemicalLanguageModule:
     """
     A chemical language model that creates semantic latent vectors from chemicals,
     based on the mutual information between subtokens of a chemical discriptor and
