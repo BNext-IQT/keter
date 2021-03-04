@@ -1,3 +1,5 @@
+import lzma
+from typing import List
 import pandas as pd
 import numpy as np
 from keter.cache import DATA_ROOT
@@ -46,6 +48,23 @@ class Toxicity(ConstructedData):
 
 class Unlabeled(ConstructedData):
     filename = "unlabeled"
+
+    def to_list(self, cache=False) -> List[str]:
+        seq_file = (CONSTRUCTED_DATA_ROOT / self.filename).with_suffix(".txt.xz")
+        if seq_file.exists():
+            with lzma.open(seq_file, "rt") as fd:
+                return fd.readlines()
+        else:
+            if cache:
+                fd = lzma.open(seq_file, "wt")
+            res = []
+            for smiles in self.to_df(cache=False).squeeze():
+                if cache:
+                    fd.write(smiles + "\n")
+                res.append(smiles)
+            if cache:
+                fd.close()
+            return res
 
     def construct(self, cache) -> pd.DataFrame:
         dataframe = (
