@@ -15,9 +15,9 @@ class ChemicalLanguage:
             pickle.dump(self.model, fd)
 
     def train(self, hyperparams=ChemicalLanguageHyperparameters()):
-        tox = Toxicity().to_df()
+        tox = Toxicity().to_df(cache=True)
         X = tox["smiles"]
         y = tox.drop("smiles", axis=1)
         y["toxicity"] = tox.apply(lambda x: 1 if x.toxicity > 0.18 else 0, axis=1)
         self.model = ChemicalLanguageModule(hyperparams)
-        self.model.fit(Unlabeled().to_df().squeeze(), X, y)
+        self.model.fit(Unlabeled().to_list(cache=True), X, y)
