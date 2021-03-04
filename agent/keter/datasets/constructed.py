@@ -24,7 +24,7 @@ class ConstructedData:
 class Toxicity(ConstructedData):
     filename = "toxicity"
 
-    def construct(self, cache) -> pd.DataFrame:
+    def construct(self, cache: bool) -> pd.DataFrame:
         dataframe = pd.merge(
             self._normalize_tox(Tox21().to_df(cache)),
             self._normalize_tox(ToxCast().to_df(cache)),
@@ -66,7 +66,7 @@ class Unlabeled(ConstructedData):
                 fd.close()
             return res
 
-    def construct(self, cache) -> pd.DataFrame:
+    def construct(self, cache: bool) -> pd.DataFrame:
         dataframe = (
             pd.concat(
                 [
