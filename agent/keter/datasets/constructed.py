@@ -1,20 +1,22 @@
+import lzma
+from typing import List
 import pandas as pd
 import numpy as np
-from keter.cache import CACHE_ROOT
+from keter.cache import DATA_ROOT
 from keter.datasets.raw import Tox21, ToxCast, Moses, Bbbp, Muv, ClinTox, Pcba, Sider
 
-CONSTRUCTED_DATA_PATH = CACHE_ROOT / "data" / "constructed"
+CONSTRUCTED_DATA_ROOT = DATA_ROOT / "constructed"
 
 
 class ConstructedData:
-    def __call__(self, cache=False) -> pd.DataFrame:
-        parquet_file = (CONSTRUCTED_DATA_PATH / self.filename).with_suffix(".parquet")
+    def to_df(self, cache=False) -> pd.DataFrame:
+        parquet_file = (CONSTRUCTED_DATA_ROOT / self.filename).with_suffix(".parquet")
         if parquet_file.exists():
             dataframe = pd.read_parquet(parquet_file)
         else:
             dataframe = self.construct(cache)
             if cache:
-                CONSTRUCTED_DATA_PATH.mkdir(parents=True, exist_ok=True)
+                CONSTRUCTED_DATA_ROOT.mkdir(parents=True, exist_ok=True)
                 dataframe.to_parquet(parquet_file)
         return dataframe
 
@@ -22,10 +24,10 @@ class ConstructedData:
 class Toxicity(ConstructedData):
     filename = "toxicity"
 
-    def construct(self, cache) -> pd.DataFrame:
+    def construct(self, cache: bool) -> pd.DataFrame:
         dataframe = pd.merge(
-            self._normalize_tox(Tox21()(cache)),
-            self._normalize_tox(ToxCast()(cache)),
+            self._normalize_tox(Tox21().to_df(cache)),
+            self._normalize_tox(ToxCast().to_df(cache)),
             on="smiles",
             how="outer",
             sort=False,
@@ -47,18 +49,37 @@ class Toxicity(ConstructedData):
 class Unlabeled(ConstructedData):
     filename = "unlabeled"
 
-    def construct(self, cache) -> pd.DataFrame:
+    def to_list(self, cache=False) -> List[str]:
+        seq_file = (CONSTRUCTED_DATA_ROOT / self.filename).with_suffix(".txt.xz")
+        if seq_file.exists():
+            with lzma.open(seq_file, "rt") as fd:
+                return fd.readlines()
+        else:
+            if cache:
+                fd = lzma.open(seq_file, "wt")
+            res = []
+            for smiles in self.to_df(cache=False).squeeze():
+                if cache:
+                    fd.write(smiles + "\n")
+                res.append(smiles)
+            if cache:
+                fd.close()
+            return res
+
+    def construct(self, cache: bool) -> pd.DataFrame:
         dataframe = (
             pd.concat(
                 [
-                    Moses()(cache)[["SMILES"]].rename(columns={"SMILES": "smiles"}),
-                    ToxCast()(cache)[["smiles"]],
-                    Tox21()(cache)[["smiles"]],
-                    Bbbp()(cache)[["smiles"]],
-                    Muv()(cache)[["smiles"]],
-                    Sider()(cache)[["smiles"]],
-                    ClinTox()(cache)[["smiles"]],
-                    Pcba()(cache)[["smiles"]],
+                    Moses()
+                    .to_df(cache)[["SMILES"]]
+                    .rename(columns={"SMILES": "smiles"}),
+                    ToxCast().to_df(cache)[["smiles"]],
+                    Tox21().to_df(cache)[["smiles"]],
+                    Bbbp().to_df(cache)[["smiles"]],
+                    Muv().to_df(cache)[["smiles"]],
+                    Sider().to_df(cache)[["smiles"]],
+                    ClinTox().to_df(cache)[["smiles"]],
+                    Pcba().to_df(cache)[["smiles"]],
                 ]
             )
             .drop_duplicates()

@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+from Cython.Build import cythonize
 
 # Boilerplate for integrating with PyTest
 from setuptools.command.test import test
@@ -65,6 +66,7 @@ setup(
     ],
     packages=find_packages(),
     install_requires=[
+        "Cython",
         "protobuf<4.0.0",
         "jinja2<3.0.0",
         "betterproto[compiler]",
@@ -91,5 +93,6 @@ setup(
             "keter = keter.__main__:main",
         ],
     },
+    ext_modules=cythonize("keter/operations.py", language_level="3"),
     cmdclass={"test": PyTest},
 )
