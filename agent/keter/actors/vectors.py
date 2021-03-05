@@ -21,6 +21,16 @@ class ChemicalLanguage:
             self.model = self.train(
                 ChemicalLanguageHyperparameters.from_dict({"vector_algo": "bow"})
             )
+        elif mode == "lda":
+            self.model = self.train(
+                ChemicalLanguageHyperparameters.from_dict({"vector_algo": "lda"})
+            )
+        elif mode == "fastd2v":
+            self.model = self.train(
+                ChemicalLanguageHyperparameters.from_dict({"doc_epochs": 5})
+            )
+        else:
+            raise ValueError("Invalid mode: " + mode)
 
         MODEL_ROOT.mkdir(parents=True, exist_ok=True)
         with lzma.open(model_file, "wb") as fd:
