@@ -1,5 +1,7 @@
 # Lab specific
 data/
+*.pickle.xz
+*.parquet
 
 # Hugo
 public/
