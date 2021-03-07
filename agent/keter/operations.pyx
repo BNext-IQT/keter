@@ -1,6 +1,23 @@
+from libc.stdlib cimport rand
 from typing import Sequence, Generator
 import numpy as np
 import cython
+
+
+def construct_infection_records(
+    date: cython.int, deaths: cython.int, lat: cython.float, long_: cython.float
+) -> list:
+    res: list = []
+    # 86 = IFR of about 1.15%
+    infections = deaths * 86
+    for i in range(infections):
+        # 216000 = 2.5 days in seconds
+        # 1296000 = 15 days in seconds
+        case_timestamp: cython.int = date + rand() % 216001 - 1296000
+        case_lat: cython.float = lat + (rand() % 2000 - 1000) / 3000
+        case_long: cython.float = long_ + (rand() % 2000 - 1000) / 3000
+        res.append(f"{case_timestamp}, {case_lat}, {case_long}")
+    return res
 
 
 def smiles2lang(smiles: str) -> str:

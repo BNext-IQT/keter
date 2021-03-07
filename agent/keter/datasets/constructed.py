@@ -1,9 +1,21 @@
 import lzma
-from typing import List
+from typing import List, Sequence
+from dateutil.parser import parse
 import pandas as pd
 import numpy as np
 from keter.cache import DATA_ROOT
-from keter.datasets.raw import Tox21, ToxCast, Moses, Bbbp, Muv, ClinTox, Pcba, Sider
+from keter.datasets.raw import (
+    Tox21,
+    ToxCast,
+    Moses,
+    Bbbp,
+    Muv,
+    ClinTox,
+    Pcba,
+    Sider,
+    CoronaDeathsUSA,
+)
+from keter.operations import construct_infection_records
 
 CONSTRUCTED_DATA_ROOT = DATA_ROOT / "constructed"
 
@@ -86,3 +98,29 @@ class Unlabeled(ConstructedData):
             .reset_index(drop=True)
         )
         return dataframe
+
+
+class InfectionNet(ConstructedData):
+    def to_csv(self, cache=False) -> Sequence[str]:
+        corona_deaths = CoronaDeathsUSA().to_df(cache)
+        corona_deaths = corona_deaths.rename(
+            columns={
+                column: int(parse(column).timestamp())
+                for column in corona_deaths.columns
+                if "/" in column
+            }
+        )
+        timestamp_columns = [
+            column for column in corona_deaths.columns if isinstance(column, int)
+        ]
+        corona_deaths[timestamp_columns] = corona_deaths[timestamp_columns].diff(axis=1)
+        corona_deaths = corona_deaths.dropna(axis=1)
+
+        for row in corona_deaths.iterrows():
+            _, series = row
+            for column, val in series.items():
+                if isinstance(column, int):
+                    for record in construct_infection_records(
+                        column, val, series.Lat, series.Long_
+                    ):
+                        yield record
