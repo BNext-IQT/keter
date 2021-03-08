@@ -100,8 +100,18 @@ class Unlabeled(ConstructedData):
         return dataframe
 
 
-class InfectionNet(ConstructedData):
+class InfectionNet:
+    filename = "infectionnet"
+
     def to_csv(self, cache=False) -> Sequence[str]:
+        csv_file = (CONSTRUCTED_DATA_ROOT / self.filename).with_suffix(".csv.xz")
+
+        if csv_file.exists():
+            with lzma.open(csv_file, "rt") as fd:
+                for line in fd:
+                    yield line.rstrip()
+                return
+
         corona_deaths = CoronaDeathsUSA().to_df(cache)
         corona_deaths = corona_deaths.rename(
             columns={
@@ -116,6 +126,8 @@ class InfectionNet(ConstructedData):
         corona_deaths[timestamp_columns] = corona_deaths[timestamp_columns].diff(axis=1)
         corona_deaths = corona_deaths.dropna(axis=1)
 
+        if cache:
+            fd = lzma.open(csv_file, "wt")
         for row in corona_deaths.iterrows():
             _, series = row
             for column, val in series.items():
@@ -123,4 +135,8 @@ class InfectionNet(ConstructedData):
                     for record in construct_infection_records(
                         column, val, series.Lat, series.Long_
                     ):
+                        if cache:
+                            fd.write(record + "\n")
                         yield record
+        if cache:
+            fd.close()
