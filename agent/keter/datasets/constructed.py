@@ -127,6 +127,7 @@ class InfectionNet:
         corona_deaths = corona_deaths.dropna(axis=1)
 
         if cache:
+            CONSTRUCTED_DATA_ROOT.mkdir(parents=True, exist_ok=True)
             fd = lzma.open(csv_file, "wt")
         for row in corona_deaths.iterrows():
             _, series = row
