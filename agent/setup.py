@@ -93,6 +93,6 @@ setup(
             "keter = keter.__main__:main",
         ],
     },
-    ext_modules=cythonize("keter/operations.py", language_level="3"),
+    ext_modules=cythonize("keter/operations.pyx", language_level="3"),
     cmdclass={"test": PyTest},
 )
