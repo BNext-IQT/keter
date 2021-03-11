@@ -6,7 +6,7 @@ from keter.cache import cache, MODEL_ROOT
 
 
 class RandomForestAnalyzer:
-    filename = "random_forest_analyzer"
+    filename = "analyzer_rf"
 
     def __init__(self):
         self.preprocessor = ChemicalLanguage("bow")

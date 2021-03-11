@@ -18,7 +18,7 @@ class FlairTox21:
     filename = "flair_tox21"
 
     def to_corpus(self, cache=False) -> Corpus:
-        data_file = (TRANSFORMED_ROOT / self.filename).with_suffix(".pickle.xz")
+        data_file = (TRANSFORMED_ROOT / self.filename).with_suffix(".pkz")
         if data_file.exists():
             with lzma.open(data_file) as fd:
                 return pickle.load(fd)

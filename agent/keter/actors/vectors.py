@@ -6,7 +6,7 @@ from keter.cache import MODEL_ROOT
 
 
 class ChemicalLanguage:
-    filename = "ChemicalLanguage"
+    filename = "chemical_language"
 
     def __init__(self, mode="default"):
         model_file = (MODEL_ROOT / self.filename).with_suffix(f".{mode}.pickle.xz")
