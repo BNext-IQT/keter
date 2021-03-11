@@ -2,15 +2,18 @@ from typing import Sequence
 from sklearn.ensemble import RandomForestRegressor
 from keter.datasets.constructed import Toxicity
 from keter.actors.vectors import ChemicalLanguage
+from keter.cache import cache, MODEL_ROOT
 
 
 class RandomForestAnalyzer:
+    filename = "random_forest_analyzer"
+
     def __init__(self):
-        self.model = self.train()
+        self.preprocessor = ChemicalLanguage("bow")
+        self.model = cache(MODEL_ROOT / self.filename, self.train)
 
     def train(self):
         data = Toxicity().to_df()
-        self.preprocessor = ChemicalLanguage("bow")
         model = RandomForestRegressor()
 
         X = self.preprocessor.transform(data["smiles"])
