@@ -1,11 +1,12 @@
 # Cache specific
-*.pickle.xz
+*.pkz
 *.csv.xz
 *.txt.xz
 *.parquet
 *.pt
 weights.txt
 loss.tsv
+test.tsv
 training.log
 
 # Hugo
