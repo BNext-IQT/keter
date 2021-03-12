@@ -42,18 +42,13 @@ class RandomForestBenchmarks:
         model = RandomForestClassifier()
 
         Xt, Xv, yt, yv = train_test_split(
-            data["smiles"], data["NR-AR"], test_size=0.2, random_state=18
+            self.preprocessor.transform(data["smiles"]),
+            data.drop(columns=["smiles", "mol_id"]),
+            test_size=0.2,
+            random_state=18,
         )
 
-        Xt = self.preprocessor.transform(Xt)
-        Xv = self.preprocessor.transform(Xv)
-        yt = yt.to_numpy()
-        yv = yv.to_numpy()
-
         model.fit(Xt, yt)
-        y_hats = model.predict_proba(Xv)
-
-        score = roc_auc_score(yv, y_hats, multi_class="ovo")
 
         return model
 
