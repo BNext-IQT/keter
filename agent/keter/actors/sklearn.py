@@ -1,5 +1,6 @@
 from typing import Sequence
-from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from autosklearn.estimators import AutoSklearnRegressor
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
 from keter.datasets.constructed import Toxicity
@@ -8,8 +9,8 @@ from keter.actors.vectors import ChemicalLanguage
 from keter.cache import cache, MODEL_ROOT
 
 
-class RandomForestAnalyzer:
-    filename = "analyzer_rf"
+class Analyzer:
+    filename = "analyzer"
 
     def __init__(self):
         self.preprocessor = ChemicalLanguage("bow")
@@ -17,7 +18,7 @@ class RandomForestAnalyzer:
 
     def train(self):
         data = Toxicity().to_df()
-        model = RandomForestRegressor()
+        model = AutoSklearnRegressor(time_left_for_this_task=18000)
 
         X = self.preprocessor.transform(data["smiles"])
         y = data["toxicity"]

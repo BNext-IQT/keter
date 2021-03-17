@@ -67,6 +67,8 @@ setup(
     packages=find_packages(),
     install_requires=[
         "Cython",
+        "gensim",
+        "auto-sklearn",
         "protobuf<4.0.0",
         "jinja2<3.0.0",
         "betterproto[compiler]",
