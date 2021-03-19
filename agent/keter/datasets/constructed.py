@@ -49,11 +49,16 @@ class Toxicity(ConstructedData):
         return dataframe.reset_index(drop=True).copy()
 
     def _normalize_tox(self, dataframe: pd.DataFrame) -> pd.DataFrame:
-        dataframe["toxicity"] = dataframe.sum(axis=1)
+        dataframe["toxicity"] = (
+            dataframe.replace(to_replace=0.0, value=-1.0).fillna(0.0).sum(axis=1)
+        )
 
         # Normalize toxicity score
+        min_val = dataframe["toxicity"].min()
         max_val = dataframe["toxicity"].max()
-        dataframe["toxicity"] = dataframe["toxicity"] ** (1 / 3) / np.cbrt(max_val)
+        dataframe["toxicity"] = (dataframe["toxicity"] - min_val) ** (1 / 2) / np.sqrt(
+            np.abs(min_val) + max_val
+        )
 
         return dataframe[["smiles", "toxicity"]]
 
