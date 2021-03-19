@@ -12,18 +12,35 @@ from keter.cache import cache, MODEL_ROOT
 class Analyzer:
     filename = "analyzer"
 
-    def __init__(self):
+    def __init__(self, mode="prod"):
+        model_file = MODEL_ROOT / f"{self.filename}_{mode}"
         self.preprocessor = ChemicalLanguage("bow")
-        self.model = cache(MODEL_ROOT / self.filename, self.train)
+        if mode == "prod":
+            self.model = cache(model_file, self.train)
+        elif mode == "test":
+            self.model = self.train(score=True, task_duration=9000)
+        else:
+            raise ValueError(f"Invalid mode: {mode}")
 
-    def train(self):
-        data = Toxicity().to_df()
-        model = AutoSklearnRegressor(time_left_for_this_task=18000)
+    def train(self, score=False, task_duration=28800):
+        data = Toxicity().to_df(cache=True)
+        model = AutoSklearnRegressor(time_left_for_this_task=task_duration)
 
-        X = self.preprocessor.transform(data["smiles"])
-        y = data["toxicity"]
+        if score:
+            Xt, Xv, yt, yv = train_test_split(
+                self.preprocessor.transform(data["smiles"]),
+                data["toxicity"],
+                test_size=0.15,
+                random_state=18,
+            )
+        else:
+            Xt = self.preprocessor.transform(data["smiles"])
+            yt = data["toxicity"]
 
-        model.fit(X, y)
+        model.fit(Xt, yt)
+
+        if score:
+            print(f"Score: {model.score(Xv, yv)}")
 
         return model
 
