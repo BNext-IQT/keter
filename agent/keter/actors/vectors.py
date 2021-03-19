@@ -18,7 +18,9 @@ class ChemicalLanguage:
             self.model = cache(
                 model_file,
                 lambda: self.train(
-                    ChemicalLanguageHyperparameters.from_dict({"vector_algo": "bow"})
+                    ChemicalLanguageHyperparameters.from_dict(
+                        {"vector_algo": "bow", "max_vocab": 4000, "max_ngram": 4}
+                    )
                 ),
             )
         elif mode == "lda":
