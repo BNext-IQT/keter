@@ -64,3 +64,11 @@ class Muv(RawData):
 class Moses(RawData):
     filename = "moses"
     url = "https://github.com/molecularsets/moses/raw/master/data/dataset_v1.csv"
+
+
+class CoronaDeathsUSA(RawData):
+    filename = "time_series_covid19_deaths_US"
+    url = (
+        "https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data"
+        "/csse_covid_19_time_series/time_series_covid19_deaths_US.csv"
+    )

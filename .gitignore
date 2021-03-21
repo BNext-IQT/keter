@@ -1,7 +1,13 @@
-# Lab specific
-data/
-*.pickle.xz
+# Cache specific
+*.pkz
+*.csv.xz
+*.txt.xz
 *.parquet
+*.pt
+weights.txt
+loss.tsv
+test.tsv
+training.log
 
 # Hugo
 public/

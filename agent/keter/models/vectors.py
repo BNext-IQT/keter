@@ -122,12 +122,13 @@ class ChemicalLanguageModule:
     def _fit_language(
         self, X_unmapped: Sequence[str], X: Sequence[str], Y: pd.DataFrame
     ):
+        max_featues = min(self.hyperparams.max_vocab, 100000)
         cv = CountVectorizer(
             max_df=0.95,
             min_df=2,
             lowercase=False,
             ngram_range=(1, self.hyperparams.max_ngram),
-            max_features=(self.hyperparams.max_vocab * 18),
+            max_features=max_featues,
             token_pattern="[a-zA-Z0-9$&+,:;=?@_/~#\\[\\]|<>.^*()%!-]+",
         )
 

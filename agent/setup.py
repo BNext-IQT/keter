@@ -67,6 +67,8 @@ setup(
     packages=find_packages(),
     install_requires=[
         "Cython",
+        "gensim",
+        "auto-sklearn",
         "protobuf<4.0.0",
         "jinja2<3.0.0",
         "betterproto[compiler]",
@@ -93,6 +95,6 @@ setup(
             "keter = keter.__main__:main",
         ],
     },
-    ext_modules=cythonize("keter/operations.py", language_level="3"),
+    ext_modules=cythonize("keter/operations.pyx", language_level="3"),
     cmdclass={"test": PyTest},
 )

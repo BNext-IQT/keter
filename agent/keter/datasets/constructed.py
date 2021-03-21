@@ -1,9 +1,21 @@
 import lzma
-from typing import List
+from typing import List, Sequence
+from dateutil.parser import parse
 import pandas as pd
 import numpy as np
 from keter.cache import DATA_ROOT
-from keter.datasets.raw import Tox21, ToxCast, Moses, Bbbp, Muv, ClinTox, Pcba, Sider
+from keter.datasets.raw import (
+    Tox21,
+    ToxCast,
+    Moses,
+    Bbbp,
+    Muv,
+    ClinTox,
+    Pcba,
+    Sider,
+    CoronaDeathsUSA,
+)
+from keter.operations import construct_infection_records
 
 CONSTRUCTED_DATA_ROOT = DATA_ROOT / "constructed"
 
@@ -37,11 +49,16 @@ class Toxicity(ConstructedData):
         return dataframe.reset_index(drop=True).copy()
 
     def _normalize_tox(self, dataframe: pd.DataFrame) -> pd.DataFrame:
-        dataframe["toxicity"] = dataframe.sum(axis=1)
+        dataframe["toxicity"] = (
+            dataframe.replace(to_replace=0.0, value=-1.0).fillna(0.0).sum(axis=1)
+        )
 
         # Normalize toxicity score
+        min_val = dataframe["toxicity"].min()
         max_val = dataframe["toxicity"].max()
-        dataframe["toxicity"] = dataframe["toxicity"] ** (1 / 3) / np.cbrt(max_val)
+        dataframe["toxicity"] = (dataframe["toxicity"] - min_val) ** (1 / 2) / np.sqrt(
+            np.abs(min_val) + max_val
+        )
 
         return dataframe[["smiles", "toxicity"]]
 
@@ -86,3 +103,46 @@ class Unlabeled(ConstructedData):
             .reset_index(drop=True)
         )
         return dataframe
+
+
+class InfectionNet:
+    filename = "infectionnet"
+
+    def to_csv(self, cache=False) -> Sequence[str]:
+        csv_file = (CONSTRUCTED_DATA_ROOT / self.filename).with_suffix(".csv.xz")
+
+        if csv_file.exists():
+            with lzma.open(csv_file, "rt") as fd:
+                for line in fd:
+                    yield line.rstrip()
+                return
+
+        corona_deaths = CoronaDeathsUSA().to_df(cache)
+        corona_deaths = corona_deaths.rename(
+            columns={
+                column: int(parse(column).timestamp())
+                for column in corona_deaths.columns
+                if "/" in column
+            }
+        )
+        timestamp_columns = [
+            column for column in corona_deaths.columns if isinstance(column, int)
+        ]
+        corona_deaths[timestamp_columns] = corona_deaths[timestamp_columns].diff(axis=1)
+        corona_deaths = corona_deaths.dropna(axis=1)
+
+        if cache:
+            CONSTRUCTED_DATA_ROOT.mkdir(parents=True, exist_ok=True)
+            fd = lzma.open(csv_file, "wt")
+        for row in corona_deaths.iterrows():
+            _, series = row
+            for column, val in series.items():
+                if isinstance(column, int):
+                    for record in construct_infection_records(
+                        column, val, series.Lat, series.Long_
+                    ):
+                        if cache:
+                            fd.write(record + "\n")
+                        yield record
+        if cache:
+            fd.close()
