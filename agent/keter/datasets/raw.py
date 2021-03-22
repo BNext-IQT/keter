@@ -61,6 +61,11 @@ class Muv(RawData):
     url = "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/muv.csv.gz"
 
 
+class Lipophilicity(RawData):
+    filename = "lipophilicity"
+    url = "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/Lipophilicity.csv"
+
+
 class Moses(RawData):
     filename = "moses"
     url = "https://github.com/molecularsets/moses/raw/master/data/dataset_v1.csv"
