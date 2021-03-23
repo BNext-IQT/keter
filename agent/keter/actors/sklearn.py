@@ -16,36 +16,40 @@ class Analyzer:
         model_file = MODEL_ROOT / f"{self.filename}_{mode}"
         self.preprocessor = ChemicalLanguage("bow")
         if mode == "prod":
-            self.model = cache(model_file, self.train)
+            self.safety_model, self.synth_model = cache(model_file, self.train)
         elif mode == "test":
-            self.model = self.train(score=True, task_duration=9000)
+            self.safety_model, self.synth_model = self.train(
+                score=True, task_duration=300
+            )
         else:
             raise ValueError(f"Invalid mode: {mode}")
 
     def train(self, score=False, task_duration=28800):
-        data = Toxicity().to_df(cache=True)
-        model = AutoSklearnRegressor(time_left_for_this_task=task_duration)
+        tox_data = Toxicity().to_df(cache=True)
+
+        safety_model = AutoSklearnRegressor(time_left_for_this_task=task_duration)
+        synth_model = AutoSklearnRegressor(time_left_for_this_task=task_duration)
 
         if score:
             Xt, Xv, yt, yv = train_test_split(
-                self.preprocessor.transform(data["smiles"]),
-                data["toxicity"],
+                self.preprocessor.transform(tox_data["smiles"]),
+                tox_data["toxicity"],
                 test_size=0.15,
                 random_state=18,
             )
         else:
-            Xt = self.preprocessor.transform(data["smiles"])
-            yt = data["toxicity"]
+            Xt = self.preprocessor.transform(tox_data["smiles"])
+            yt = tox_data["toxicity"]
 
-        model.fit(Xt, yt)
+        safety_model.fit(Xt, yt)
 
         if score:
-            print(f"Score: {model.score(Xv, yv)}")
+            print(f"Score: {safety_model.score(Xv, yv)}")
 
-        return model
+        return safety_model, synth_model
 
     def analyze(self, smiles: Sequence[str]) -> Sequence[float]:
-        return self.model.predict(self.preprocessor.transform(smiles))
+        return self.safety_model.predict(self.preprocessor.transform(smiles))
 
 
 class RandomForestBenchmarks:
