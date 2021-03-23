@@ -66,6 +66,13 @@ class Lipophilicity(RawData):
     url = "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/Lipophilicity.csv"
 
 
+class ESOL(RawData):
+    filename = "esol"
+    url = (
+        "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/delaney-processed.csv"
+    )
+
+
 class Moses(RawData):
     filename = "moses"
     url = "https://github.com/molecularsets/moses/raw/master/data/dataset_v1.csv"
