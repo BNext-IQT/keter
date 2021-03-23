@@ -24,7 +24,7 @@ class Analyzer:
         else:
             raise ValueError(f"Invalid mode: {mode}")
 
-    def train(self, score=False, task_duration=28800):
+    def train(self, score=False, task_duration=14400):
         def train_model(data, target_label):
             dataframe = data.to_df(cache=True)
             model = AutoSklearnRegressor(time_left_for_this_task=task_duration)
