@@ -14,6 +14,7 @@ from keter.datasets.raw import (
     Pcba,
     Sider,
     CoronaDeathsUSA,
+    ESOL,
 )
 from keter.operations import construct_infection_records
 
@@ -61,6 +62,23 @@ class Toxicity(ConstructedData):
         )
 
         return dataframe[["smiles", "toxicity"]]
+
+
+class Feasibility(ConstructedData):
+    filename = "feasibility"
+
+    def construct(self, cache: bool) -> pd.DataFrame:
+        esol = ESOL().to_df(cache)
+        esol_ylabel = "ESOL predicted log solubility in mols per litre"
+
+        # Normalize feasibility score
+        min_val = esol[esol_ylabel].min()
+        max_val = esol[esol_ylabel].max()
+        esol["feasibility"] = (esol[esol_ylabel] - min_val) / (
+            np.abs(min_val) + max_val
+        )
+
+        return esol[["smiles", "feasibility"]].reset_index(drop=True).copy()
 
 
 class Unlabeled(ConstructedData):
