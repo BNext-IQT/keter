@@ -50,7 +50,10 @@ class Analyzer:
         )
 
     def analyze(self, smiles: Sequence[str]) -> Sequence[float]:
-        return self.safety_model.predict(self.preprocessor.transform(smiles))
+        features = self.preprocessor.transform(smiles)
+        return zip(
+            smiles, self.safety.predict(features), self.feasibility.predict(features)
+        )
 
 
 class RandomForestBenchmarks:
