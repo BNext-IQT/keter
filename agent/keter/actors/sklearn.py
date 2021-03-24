@@ -54,7 +54,7 @@ class Analyzer:
             Feasibility(), "feasibility"
         )
 
-    def analyze(self, smiles: List[str]) -> pd.DataFrame:
+    def analyze(self, smiles: List[str], only_drugs=True) -> pd.DataFrame:
         features = self.preprocessor.transform(smiles)
 
         # RDKit molecular properties
@@ -78,7 +78,7 @@ class Analyzer:
         safety = self.safety.predict(features)
         feasibility = self.feasibility.predict(features)
 
-        return pd.DataFrame(
+        dataframe = pd.DataFrame(
             {
                 "key": inchikey,
                 "smiles": smiles,
@@ -91,6 +91,20 @@ class Analyzer:
             }
         )
 
+        if only_drugs:
+            # Lipinsky's rules
+            dataframe = dataframe[dataframe.weight < 500]
+            dataframe = dataframe[dataframe.hdonors <= 5]
+            dataframe = dataframe[dataframe.hacceptors <= 10]
+            dataframe = dataframe[dataframe.logp <= 5]
+
+            # Filter too toxic and infeasible compounds
+            dataframe = dataframe[dataframe.safety < 0.3]
+            dataframe = dataframe[dataframe.feasibility > 0.3]
+
+            dataframe = dataframe.reset_index(drop=True)
+
+        return dataframe
 
 class RandomForestBenchmarks:
     filename = "benchmarks_rf"
