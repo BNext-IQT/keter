@@ -11,17 +11,18 @@ from sklearn.metrics import roc_auc_score
 from keter.datasets.constructed import Toxicity, Feasibility
 from keter.datasets.raw import Tox21
 from keter.actors.vectors import ChemicalLanguage
-from keter.cache import cache, MODEL_ROOT
+from keter.stage import Stage, ReadOnlyStage
 
 
 class Analyzer:
     filename = "analyzer"
 
-    def __init__(self, mode="prod"):
-        model_file = MODEL_ROOT / f"{self.filename}_{mode}"
+    def __init__(self, mode="prod", stage: Stage = ReadOnlyStage()):
+        model_file = (stage.MODEL_ROOT / f"{self.filename}_{mode}").with_suffix(".pkz")
         self.preprocessor = ChemicalLanguage("bow")
+        self.stage = stage
         if mode == "prod":
-            self.safety, self.feasibility = cache(model_file, self.train)
+            self.safety, self.feasibility = stage.cache(model_file, self.train)
         elif mode == "test":
             self.safety, self.feasibility = self.train(score=True, task_duration=300)
         else:
@@ -29,7 +30,7 @@ class Analyzer:
 
     def train(self, score=False, task_duration=14400):
         def train_model(data, target_label):
-            dataframe = data.to_df(cache=True)
+            dataframe = data.to_df(stage=self.stage)
             model = AutoSklearnRegressor(time_left_for_this_task=task_duration)
 
             if score:

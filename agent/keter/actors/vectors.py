@@ -3,35 +3,35 @@ import lzma
 from typing import Sequence
 from keter.models.vectors import ChemicalLanguageModule, ChemicalLanguageHyperparameters
 from keter.datasets.constructed import Unlabeled, Toxicity
-from keter.cache import MODEL_ROOT, cache
+from keter.stage import Stage, ReadOnlyStage
 
 
 class ChemicalLanguage:
     filename = "chemical_language"
 
-    def __init__(self, mode="default"):
-        model_file = MODEL_ROOT / f"{self.filename}_{mode}"
+    def __init__(self, mode="default", stage: Stage = ReadOnlyStage()):
+        model_file = (stage.MODEL_ROOT / f"{self.filename}_{mode}").with_suffix(".pkz")
 
         if mode == "default":
-            self.model = cache(model_file, self.train)
+            self.model = stage.cache(model_file, self.train)
         elif mode == "bow":
-            self.model = cache(
+            self.model = stage.cache(
                 model_file,
                 lambda: self.train(
                     ChemicalLanguageHyperparameters.from_dict(
-                        {"vector_algo": "bow", "max_vocab": 4000, "max_ngram": 4}
+                        {"vector_algo": "bow", "max_vocab": 5000, "max_ngram": 4}
                     )
                 ),
             )
         elif mode == "lda":
-            self.model = cache(
+            self.model = stage.cache(
                 model_file,
                 lambda: self.train(
                     ChemicalLanguageHyperparameters.from_dict({"vector_algo": "lda"})
                 ),
             )
         elif mode == "fastd2v":
-            self.model = cache(
+            self.model = stage.cache(
                 model_file,
                 lambda: self.train(
                     ChemicalLanguageHyperparameters.from_dict({"doc_epochs": 5})

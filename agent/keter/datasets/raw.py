@@ -1,21 +1,12 @@
 from functools import reduce
 import pandas as pd
-from keter.cache import DATA_ROOT
-
-RAW_DATA_ROOT = DATA_ROOT / "raw"
+from keter.stage import ReadOnlyStage, Stage
 
 
 class RawData:
-    def to_df(self, cache=True) -> pd.DataFrame:
-        parquet_file = (RAW_DATA_ROOT / self.filename).with_suffix(".parquet")
-        if parquet_file.exists():
-            dataframe = pd.read_parquet(parquet_file)
-        else:
-            dataframe = self.download()
-            if cache:
-                RAW_DATA_ROOT.mkdir(parents=True, exist_ok=True)
-                dataframe.to_parquet(parquet_file)
-        return dataframe
+    def to_df(self, stage: Stage = ReadOnlyStage()) -> pd.DataFrame:
+        path = (stage.DATA_ROOT / "raw" / self.filename).with_suffix(".parquet")
+        return stage.cache(path, self.download)
 
     def download(self) -> pd.DataFrame:
         # All raw data uses CSV at this time
