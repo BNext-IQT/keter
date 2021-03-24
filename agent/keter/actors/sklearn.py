@@ -1,4 +1,9 @@
-from typing import Sequence
+from typing import Sequence, List
+import pandas as pd
+from rdkit.Chem import MolFromSmiles, MolToInchiKey
+from rdkit.Chem.Crippen import MolLogP
+from rdkit.Chem.Descriptors import ExactMolWt
+from rdkit.Chem.Lipinski import NumHDonors, NumHAcceptors
 from autosklearn.estimators import AutoSklearnRegressor
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -49,10 +54,41 @@ class Analyzer:
             Feasibility(), "feasibility"
         )
 
-    def analyze(self, smiles: Sequence[str]) -> Sequence[float]:
+    def analyze(self, smiles: List[str]) -> pd.DataFrame:
         features = self.preprocessor.transform(smiles)
-        return zip(
-            smiles, self.safety.predict(features), self.feasibility.predict(features)
+
+        # RDKit molecular properties
+        inchikey = []
+        weight = []
+        logp = []
+        hdonors = []
+        hacceptors = []
+        for example in smiles:
+            mol = MolFromSmiles(example)
+            if not mol:
+                raise ValueError("Malformed molecule passed in to analyze")
+
+            inchikey.append(MolToInchiKey(mol))
+            weight.append(ExactMolWt(mol))
+            logp.append(MolLogP(mol))
+            hdonors.append(NumHDonors(mol))
+            hacceptors.append(NumHAcceptors(mol))
+
+        # Scores
+        safety = self.safety.predict(features)
+        feasibility = self.feasibility.predict(features)
+
+        return pd.DataFrame(
+            {
+                "key": inchikey,
+                "smiles": smiles,
+                "weight": weight,
+                "logp": logp,
+                "hdonors": hdonors,
+                "hacceptors": hacceptors,
+                "safety": safety,
+                "feasibility": feasibility,
+            }
         )
 
 
