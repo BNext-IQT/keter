@@ -16,11 +16,9 @@ class Analyzer:
         model_file = MODEL_ROOT / f"{self.filename}_{mode}"
         self.preprocessor = ChemicalLanguage("bow")
         if mode == "prod":
-            self.safety_model, self._model = cache(model_file, self.train)
+            self.safety, self.feasibility = cache(model_file, self.train)
         elif mode == "test":
-            self.safety_model, self.synth_model = self.train(
-                score=True, task_duration=300
-            )
+            self.safety, self.feasibility = self.train(score=True, task_duration=300)
         else:
             raise ValueError(f"Invalid mode: {mode}")
 
