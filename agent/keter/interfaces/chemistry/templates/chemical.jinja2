@@ -1,0 +1,53 @@
+{% extends "base.jinja2" %}
+
+{% block content %}
+<script src="https://unpkg.com/smiles-drawer@1.2.0/dist/smiles-drawer.min.js"></script>
+
+<div class="container">
+    <div class="row">
+        <div class="one-half column">
+            <canvas data-smiles="{{ drug.smiles }}"></canvas>
+        </div>
+        <div class="one-half column">
+            <h5>Scores</h5>
+            <p>
+                <b>Safety:</b> {{drug.safety | round(2)}}
+                <br>
+                <b>Feasibility:</b> {{ drug.feasibility | round(2) }}
+            </p>
+            <h5>Representations</h5>
+            <p>
+                <b>InChl Key:</b> {{ drug.key }}
+                <br>
+                <b>SMILES:</b> {{ drug.smiles }}
+            </p>
+            <h5>Properties</h5>
+            <p>
+                <b>Mass:</b> {{ drug.weight | round(2) }}
+                <br>
+                <b>LogP:</b> {{ drug.logp | round(3) }}
+                <br>
+                <b>Hydrogen Donors:</b> {{ drug.hdonors }}
+                <br>
+                <b>Hydrogen Acceptors:</b> {{ drug.hacceptors }}
+            </p>
+        </div>
+    </div>
+    {% if targets %}
+        <div class="row">
+            <h5>Bioactivity</h5>
+        </div>
+        <table>
+        <tr>
+            <th>Target</th>
+            <th>Affinity</th>
+        </tr>
+        {% for target in targets %}
+            <tr><td>{{ target.name }}</td><td>{{ target.affinity }}</td></tr>
+        {% endfor %}
+        </table>
+    {% endif %}
+</div>
+
+<script>SmilesDrawer.apply({ width: 400, height: 300, padding: 10});</script>
+{% endblock %}
