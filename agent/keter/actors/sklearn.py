@@ -8,7 +8,7 @@ from autosklearn.estimators import AutoSklearnRegressor
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
-from keter.datasets.constructed import Toxicity, Feasibility
+from keter.datasets.constructed import Safety, Feasibility
 from keter.datasets.raw import Tox21
 from keter.actors.vectors import ChemicalLanguage
 from keter.stage import Stage, ReadOnlyStage
@@ -51,7 +51,7 @@ class Analyzer:
 
             return model
 
-        return train_model(Toxicity(), "toxicity"), train_model(
+        return train_model(Safety(), "safety"), train_model(
             Feasibility(), "feasibility"
         )
 
@@ -100,15 +100,16 @@ class Analyzer:
             dataframe = dataframe[dataframe.logp <= 5]
 
             # Filter too toxic and infeasible compounds
-            dataframe = dataframe[dataframe.safety < 0.3]
-            dataframe = dataframe[dataframe.feasibility > 0.3]
+            dataframe = dataframe[dataframe.safety > 0.7]
+            dataframe = dataframe[dataframe.feasibility > 0.7]
 
             dataframe = dataframe.reset_index(drop=True)
 
         return dataframe
 
-class RandomForestBenchmarks:
-    filename = "benchmarks_rf"
+
+class Benchmarks:
+    filename = "benchmarks"
 
     def __init__(self):
         self.preprocessor = ChemicalLanguage("bow")
@@ -126,6 +127,15 @@ class RandomForestBenchmarks:
         )
 
         model.fit(Xt, yt)
+        _, y_hats = model.predict_proba(Xv)
+        scores = []
+        print(y_hats)
+        scores = roc_auc_score(yv.to_numpy(), y_hats[:, 1], multi_class="ovo")
+        # for i, y_hat in enumerate(y_hats):
+        #     scores.append(
+        #         roc_auc_score(yv.to_numpy()[:, i], y_hat[:, 1], multi_class="ovo")
+        #     )
+        print(scores)
 
         return model
 

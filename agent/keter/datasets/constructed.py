@@ -25,8 +25,8 @@ class ConstructedData:
         return stage.cache(path, lambda: self.construct(stage))
 
 
-class Toxicity(ConstructedData):
-    filename = "toxicity"
+class Safety(ConstructedData):
+    filename = "safety"
 
     def construct(self, stage: Stage) -> pd.DataFrame:
         dataframe = pd.merge(
@@ -36,23 +36,23 @@ class Toxicity(ConstructedData):
             how="outer",
             sort=False,
         )
-        dataframe["toxicity"] = dataframe[["toxicity_x", "toxicity_y"]].mean(axis=1)
-        dataframe = dataframe.drop(["toxicity_x", "toxicity_y"], axis=1)
+        dataframe["safety"] = dataframe[["safety_x", "safety_y"]].mean(axis=1)
+        dataframe = dataframe.drop(["safety_x", "safety_y"], axis=1)
         return dataframe.reset_index(drop=True).copy()
 
     def _normalize_tox(self, dataframe: pd.DataFrame) -> pd.DataFrame:
-        dataframe["toxicity"] = (
+        dataframe["safety"] = (
             dataframe.replace(to_replace=0.0, value=-1.0).fillna(0.0).sum(axis=1)
         )
 
-        # Normalize toxicity score
-        min_val = dataframe["toxicity"].min()
-        max_val = dataframe["toxicity"].max()
-        dataframe["toxicity"] = (dataframe["toxicity"] - min_val) ** (1 / 2) / np.sqrt(
+        # Normalize safety score
+        min_val = dataframe["safety"].min()
+        max_val = dataframe["safety"].max()
+        dataframe["safety"] = 1 - (dataframe["safety"] - min_val) ** (1 / 2) / np.sqrt(
             np.abs(min_val) + max_val
         )
 
-        return dataframe[["smiles", "toxicity"]]
+        return dataframe[["smiles", "safety"]]
 
 
 class Feasibility(ConstructedData):

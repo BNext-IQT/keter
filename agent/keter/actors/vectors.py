@@ -2,7 +2,7 @@ import pickle
 import lzma
 from typing import Sequence
 from keter.models.vectors import ChemicalLanguageModule, ChemicalLanguageHyperparameters
-from keter.datasets.constructed import Unlabeled, Toxicity
+from keter.datasets.constructed import Unlabeled, Safety
 from keter.stage import Stage, ReadOnlyStage
 
 
@@ -41,10 +41,10 @@ class ChemicalLanguage:
             raise ValueError("Invalid mode: " + mode)
 
     def train(self, hyperparams=ChemicalLanguageHyperparameters()):
-        tox = Toxicity().to_df(cache=True)
-        X = tox["smiles"]
-        y = tox.drop("smiles", axis=1)
-        y["toxicity"] = tox.apply(lambda x: 1 if x.toxicity > 0.18 else 0, axis=1)
+        safety = Safety().to_df(cache=True)
+        X = safety["smiles"]
+        y = safety.drop("smiles", axis=1)
+        y["safety"] = tox.apply(lambda x: 1 if x.safety > 0.7 else 0, axis=1)
         model = ChemicalLanguageModule(hyperparams)
         model.fit(Unlabeled().to_list(cache=True), X, y)
         return model
