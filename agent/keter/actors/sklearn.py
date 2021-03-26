@@ -100,8 +100,8 @@ class Analyzer:
             dataframe = dataframe[dataframe.logp <= 5]
 
             # Filter too toxic and infeasible compounds
-            dataframe = dataframe[dataframe.safety > 0.7]
-            dataframe = dataframe[dataframe.feasibility > 0.7]
+            dataframe = dataframe[dataframe.safety > 0.75]
+            dataframe = dataframe[dataframe.feasibility > 0.75]
 
             dataframe = dataframe.reset_index(drop=True)
 
