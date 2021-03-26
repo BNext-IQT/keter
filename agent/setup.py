@@ -40,6 +40,9 @@ class PyTest(test):
         sys.exit(errno)
 
 
+with open("requirements.txt") as fd:
+    install_requires = fd.read().splitlines()
+
 # The actual setup metadata
 setup(
     name="keter",
@@ -65,30 +68,7 @@ setup(
         "Operating System :: OS Independent",
     ],
     packages=find_packages(),
-    install_requires=[
-        "Cython",
-        "gensim",
-        "auto-sklearn",
-        "protobuf<4.0.0",
-        "jinja2<3.0.0",
-        "betterproto[compiler]",
-        "pyarrow",
-        "selfies",
-        "fire",
-        "flair",
-        "aioredis",
-        "psutil",
-        "aiohttp_cors",
-        "redis",
-        "aiohttp",
-        "grpcio",
-        "msgpack",
-        "ray",
-        "dvc[s3]",
-        "flask",
-        "deepchem",
-        "tensorflow==2.3.*",
-    ],
+    install_requires=install_requires,
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [

@@ -1,8 +1,6 @@
 Keter Agent
 ~~~~~~~~~~~
 
-Runs on top of [Ray](https://ray.io/).
-
 * Training or refining antivirial models
 * Train or refining forecasting models
 * Inference using trained models
