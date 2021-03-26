@@ -38,8 +38,12 @@ def index():
     return render_template("list.jinja2", drugs=dataframe.to_dict("index"))
 
 
-if __name__ == "__main__":
+def create_jamstack():
     app.config["FREEZER_IGNORE_MIMETYPE_WARNINGS"] = True
     app.config["FREEZER_DESTINATION"] = ReadOnlyStage().OUTPUTS_ROOT / "static_html"
     freezer = Freezer(app)
     freezer.freeze()
+
+
+if __name__ == "__main__":
+    create_jamstack()
