@@ -17,10 +17,10 @@ app = Flask(__name__)
 dataframe = make_drug_db(ReadOnlyStage().OUTPUTS_ROOT)
 
 
-@app.route("/drug/<name>")
-def drug(name: str):
+@app.route("/drug/<key>")
+def drug(key: str):
     try:
-        drug = dataframe.loc[name]
+        drug = dataframe.loc[key]
     except:
-        raise ValueError(f"Drug {name} not found")
-    return render_template("chemical.jinja2", drug={"key": name, **drug})
+        abort(404)
+    return render_template("chemical.jinja2", drug={"key": key, **drug})
