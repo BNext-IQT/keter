@@ -1,0 +1,18 @@
+{% extends "base.jinja2" %}
+
+{% block content %}
+<table style="margin-left:auto; margin-right:auto;">
+    <tr>
+        <th>InChl Key</th>
+        <th>Safety Score</th>
+        <th>Feasibility Score</th>
+    </tr>
+{% for key, values in drugs.items() %}
+    <tr>
+        <td><a href="{{ url_for('drug', key=key) }}">{{ key }}</a></td>
+        <td>{{ values["safety"] | round(2) }}</td>
+        <td>{{ values["feasibility"] | round(2) }}</td>
+    </tr>
+{% endfor %}
+</table>
+{% endblock %}
