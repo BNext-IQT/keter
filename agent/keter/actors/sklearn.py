@@ -33,13 +33,17 @@ class Analyzer:
             )
         elif mode == "test":
             self.safety, self.feasibility, self.bbbp = self.train(
-                score=True, task_duration=300
+                score=True, task_duration=900
             )
         else:
             raise ValueError(f"Invalid mode: {mode}")
 
-    def train(self, score=False, task_duration=13000):
-        def train_model(data, target_label, regressor=True):
+    def train(self, score=False, task_duration=4500):
+        safety_task_duration = task_duration // 2
+        feasibility_task_duration = task_duration // 4
+        bbbp_task_duration = task_duration // 4
+
+        def train_model(data, target_label, duration, regressor=True):
             dataframe = data.to_df(stage=self.stage)
             if regressor:
                 model = AutoSklearnRegressor(time_left_for_this_task=task_duration)
@@ -67,9 +71,9 @@ class Analyzer:
             return model
 
         return (
-            train_model(Safety(), "safety"),
-            train_model(Feasibility(), "feasibility"),
-            train_model(Bbbp(), "p_np", regressor=False),
+            train_model(Safety(), "safety", safety_task_duration),
+            train_model(Feasibility(), "feasibility", feasibility_task_duration),
+            train_model(Bbbp(), "p_np", bbbp_task_duration, regressor=False),
         )
 
     def analyze(self, smiles: List[str], only_drugs=True) -> pd.DataFrame:
