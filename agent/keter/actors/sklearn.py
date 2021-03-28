@@ -4,8 +4,7 @@ from rdkit.Chem import MolFromSmiles, MolToInchiKey
 from rdkit.Chem.Crippen import MolLogP
 from rdkit.Chem.Descriptors import ExactMolWt
 from rdkit.Chem.Lipinski import NumHDonors, NumHAcceptors
-from autosklearn.estimators import AutoSklearnRegressor
-from autosklearn.experimental.askl2 import AutoSklearn2Classifier
+from autosklearn.estimators import AutoSklearnRegressor, AutoSklearnClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
@@ -46,11 +45,9 @@ class Analyzer:
         def train_model(data, target_label, duration, regressor=True):
             dataframe = data.to_df(stage=self.stage)
             if regressor:
-                model = AutoSklearnRegressor(time_left_for_this_task=task_duration)
+                model = AutoSklearnRegressor(time_left_for_this_task=duration)
             else:
-                model = AutoSklearn2Classifier(
-                    time_left_for_this_task=(task_duration // 2)
-                )
+                model = AutoSklearnClassifier(time_left_for_this_task=duration)
 
             if score:
                 Xt, Xv, yt, yv = train_test_split(
