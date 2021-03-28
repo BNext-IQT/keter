@@ -20,7 +20,12 @@ class Analyzer:
 
     def __init__(self, mode="prod", stage: Stage = ReadOnlyStage()):
         model_file = (stage.MODEL_ROOT / f"{self.filename}_{mode}").with_suffix(".pkz")
-        self.preprocessor = ChemicalLanguage("bow")
+        if mode != "doc2vec":
+            self.preprocessor = ChemicalLanguage("bow", stage=stage)
+        elif mode != "lda":
+            self.preprocessor = ChemicalLanguage("lda", stage=stage)
+        else:
+            self.preprocessor = ChemicalLanguage(stage=stage)
         self.stage = stage
         if mode in ["doc2vec", "prod", "lda"]:
             self.safety, self.feasibility, self.bbbp = stage.cache(
