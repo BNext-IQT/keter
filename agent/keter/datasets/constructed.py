@@ -13,6 +13,8 @@ from keter.datasets.raw import (
     ClinTox,
     Pcba,
     Sider,
+    Bbbp,
+    Lipophilicity,
     CoronaDeathsUSA,
     ESOL,
 )
@@ -92,6 +94,8 @@ class Unlabeled(ConstructedData):
                     Sider().to_df(stage)[["smiles"]],
                     ClinTox().to_df(stage)[["smiles"]],
                     Pcba().to_df(stage)[["smiles"]],
+                    Bbbp().to_df(stage)[["smiles"]],
+                    Lipophilicity().to_df(stage)[["smiles"]],
                 ]
             )
             .drop_duplicates()
