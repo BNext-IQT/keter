@@ -5,11 +5,12 @@ from rdkit.Chem.Crippen import MolLogP
 from rdkit.Chem.Descriptors import ExactMolWt
 from rdkit.Chem.Lipinski import NumHDonors, NumHAcceptors
 from autosklearn.estimators import AutoSklearnRegressor
+from autosklearn.experimental.askl2 import AutoSklearn2Classifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
 from keter.datasets.constructed import Safety, Feasibility
-from keter.datasets.raw import Tox21
+from keter.datasets.raw import Tox21, Bbbp
 from keter.actors.vectors import ChemicalLanguage
 from keter.stage import Stage, ReadOnlyStage
 
@@ -21,17 +22,26 @@ class Analyzer:
         model_file = (stage.MODEL_ROOT / f"{self.filename}_{mode}").with_suffix(".pkz")
         self.preprocessor = ChemicalLanguage("bow")
         self.stage = stage
-        if mode == "prod":
-            self.safety, self.feasibility = stage.cache(model_file, self.train)
+        if mode in ["doc2vec", "prod", "lda"]:
+            self.safety, self.feasibility, self.bbbp = stage.cache(
+                model_file, self.train
+            )
         elif mode == "test":
-            self.safety, self.feasibility = self.train(score=True, task_duration=300)
+            self.safety, self.feasibility, self.bbbp = self.train(
+                score=True, task_duration=300
+            )
         else:
             raise ValueError(f"Invalid mode: {mode}")
 
-    def train(self, score=False, task_duration=14400):
-        def train_model(data, target_label):
+    def train(self, score=False, task_duration=13000):
+        def train_model(data, target_label, regressor=True):
             dataframe = data.to_df(stage=self.stage)
-            model = AutoSklearnRegressor(time_left_for_this_task=task_duration)
+            if regressor:
+                model = AutoSklearnRegressor(time_left_for_this_task=task_duration)
+            else:
+                model = AutoSklearn2Classifier(
+                    time_left_for_this_task=(task_duration // 2)
+                )
 
             if score:
                 Xt, Xv, yt, yv = train_test_split(
@@ -51,8 +61,10 @@ class Analyzer:
 
             return model
 
-        return train_model(Safety(), "safety"), train_model(
-            Feasibility(), "feasibility"
+        return (
+            train_model(Safety(), "safety"),
+            train_model(Feasibility(), "feasibility"),
+            train_model(Bbbp(), "p_np", regressor=False),
         )
 
     def analyze(self, smiles: List[str], only_drugs=True) -> pd.DataFrame:
@@ -78,6 +90,7 @@ class Analyzer:
         # Scores
         safety = self.safety.predict(features)
         feasibility = self.feasibility.predict(features)
+        bbbp = self.bbbp.predict_proba(features)
 
         dataframe = pd.DataFrame(
             {
@@ -89,6 +102,7 @@ class Analyzer:
                 "hacceptors": hacceptors,
                 "safety": safety,
                 "feasibility": feasibility,
+                "bbbp": bbbp,
             }
         )
 
