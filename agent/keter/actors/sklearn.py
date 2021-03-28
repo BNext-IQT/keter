@@ -108,7 +108,7 @@ class Analyzer:
                 "hacceptors": hacceptors,
                 "safety": safety,
                 "feasibility": feasibility,
-                "bbbp": bbbp,
+                "bbbp": (i[1] for i in bbbp),
             }
         )
 
