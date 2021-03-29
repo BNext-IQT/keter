@@ -31,10 +31,10 @@
                 <br>
                 <b>Hydrogen Acceptors:</b> {{ drug.hacceptors }}
                 <br>
-                {% if drug.bbpp > 0.5 %}
-                <b>Blood-Brain Permeable:</b> Yes (Confidence: {{ drug.bbbp }})
+                {% if drug.bbbp > 0.5 %}
+                <b>Blood-Brain Permeable:</b> Yes (Confidence: {{ '%0.2f' % drug.bbbp }})
                 {% else %}
-                <b>Blood-Brain Permeable:</b> No (Confidence: {{ 1 - drug.bbbp }})
+                <b>Blood-Brain Permeable:</b> No (Confidence: {{ '%0.2f' % (1 - drug.bbbp) }})
                 {% endif %}
             </p>
         </div>
