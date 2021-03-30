@@ -47,7 +47,7 @@ class ChemicalLanguageHyperparameters:
     vec_dims = 460
     vec_window = 4
     max_vocab = 35000
-    doc_epochs = 50
+    doc_epochs = 110
     alpha = 0.05
 
     # LDA hyperparams
