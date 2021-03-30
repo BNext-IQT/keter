@@ -9,7 +9,7 @@ from keter.stage import Stage, ReadOnlyStage
 class ChemicalLanguage:
     filename = "chemical_language"
 
-    def __init__(self, mode="default", stage: Stage = ReadOnlyStage()):
+    def __init__(self, mode="bow", stage: Stage = ReadOnlyStage()):
         self.stage = stage
         model_file = (stage.MODEL_ROOT / f"{self.filename}_{mode}").with_suffix(".pkz")
 
@@ -28,14 +28,16 @@ class ChemicalLanguage:
             self.model = stage.cache(
                 model_file,
                 lambda: self.train(
-                    ChemicalLanguageHyperparameters.from_dict({"vector_algo": "lda"})
+                    ChemicalLanguageHyperparameters.from_dict(
+                        {"vector_algo": "lda", "topics": 100}
+                    )
                 ),
             )
-        elif mode == "fastd2v":
+        elif mode == "doc2vec":
             self.model = stage.cache(
                 model_file,
                 lambda: self.train(
-                    ChemicalLanguageHyperparameters.from_dict({"doc_epochs": 5})
+                    ChemicalLanguageHyperparameters.from_dict({"doc_epochs": 30})
                 ),
             )
         else:

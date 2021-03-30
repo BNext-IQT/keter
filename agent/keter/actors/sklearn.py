@@ -19,12 +19,12 @@ class Analyzer:
 
     def __init__(self, mode="prod", stage: Stage = ReadOnlyStage()):
         model_file = (stage.MODEL_ROOT / f"{self.filename}_{mode}").with_suffix(".pkz")
-        if mode != "doc2vec":
-            self.preprocessor = ChemicalLanguage("bow", stage=stage)
-        elif mode != "lda":
+        if mode == "doc2vec":
+            self.preprocessor = ChemicalLanguage("doc2vec", stage=stage)
+        elif mode == "lda":
             self.preprocessor = ChemicalLanguage("lda", stage=stage)
         else:
-            self.preprocessor = ChemicalLanguage(stage=stage)
+            self.preprocessor = ChemicalLanguage("bow", stage=stage)
         self.stage = stage
         if mode in ["doc2vec", "prod", "lda"]:
             self.safety, self.feasibility, self.bbbp = stage.cache(
@@ -37,7 +37,7 @@ class Analyzer:
         else:
             raise ValueError(f"Invalid mode: {mode}")
 
-    def train(self, score=False, task_duration=4500):
+    def train(self, score=False, task_duration=32400):
         safety_task_duration = task_duration // 2
         feasibility_task_duration = task_duration // 4
         bbbp_task_duration = task_duration // 4

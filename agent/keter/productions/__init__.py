@@ -2,14 +2,14 @@ from tqdm import tqdm
 import pandas as pd
 
 
-def drug_discovery_on_moses(mode="bow"):
+def drug_discovery_on_moses(mode="prod"):
     from keter.stage import FileSystemStage
     from keter.actors.sklearn import Analyzer
     from keter.datasets.raw import Moses
 
     stage = FileSystemStage()
-    if mode == "bow":
-        analyzer = Analyzer(mode="prod", stage=stage)
+    if mode == "prod":
+        analyzer = Analyzer(stage=stage)
     elif mode == "doc2vec":
         analyzer = Analyzer(mode="doc2vec", stage=stage)
     elif mode == "lda":
@@ -37,7 +37,7 @@ def drug_discovery_on_moses(mode="bow"):
 
 
 def drug_discovery_on_moses_bow():
-    drug_discovery_on_moses("bow")
+    drug_discovery_on_moses("prod")
 
 
 def drug_discovery_on_moses_doc2vec():
