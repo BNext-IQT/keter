@@ -57,6 +57,11 @@ class Lipophilicity(RawData):
     url = "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/Lipophilicity.csv"
 
 
+class HIV(RawData):
+    filename = "hiv"
+    url = "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/HIV.csv"
+
+
 class ESOL(RawData):
     filename = "esol"
     url = (
