@@ -10,7 +10,7 @@ from dvc.repo import Repo
 class Stage:
     CACHE_ROOT = (
         os.environ.get("KETER_CACHE")
-        or (Path(__file__).parent.parent / "cache").absolute()
+        or (Path(__file__).parent.parent.parent / "cache").absolute()
     )
 
     DATA_ROOT = CACHE_ROOT / "data"

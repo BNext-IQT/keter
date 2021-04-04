@@ -13,6 +13,8 @@ from keter.datasets.raw import (
     ClinTox,
     Pcba,
     Sider,
+    Bbbp,
+    Lipophilicity,
     CoronaDeathsUSA,
     ESOL,
 )
@@ -75,20 +77,8 @@ class Feasibility(ConstructedData):
 class Unlabeled(ConstructedData):
     filename = "unlabeled"
 
-    # TODO: Respect the stage
     def to_list(self, stage: Stage = ReadOnlyStage()) -> List[str]:
-        path = (stage.DATA_ROOT / "constructed" / self.filename).with_suffix(".txt.xz")
-        if path.exists():
-            with lzma.open(seq_file, "rt") as fd:
-                return fd.readlines()
-        else:
-            fd = lzma.open(seq_file, "wt")
-            res = []
-            for smiles in self.to_df(stage=False).squeeze():
-                fd.write(smiles + "\n")
-                res.append(smiles)
-                fd.close()
-            return res
+        return self.to_df(stage=stage)["smiles"].tolist()
 
     def construct(self, stage: Stage) -> pd.DataFrame:
         dataframe = (
@@ -104,6 +94,8 @@ class Unlabeled(ConstructedData):
                     Sider().to_df(stage)[["smiles"]],
                     ClinTox().to_df(stage)[["smiles"]],
                     Pcba().to_df(stage)[["smiles"]],
+                    Bbbp().to_df(stage)[["smiles"]],
+                    Lipophilicity().to_df(stage)[["smiles"]],
                 ]
             )
             .drop_duplicates()

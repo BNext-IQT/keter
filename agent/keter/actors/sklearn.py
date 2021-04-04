@@ -4,12 +4,12 @@ from rdkit.Chem import MolFromSmiles, MolToInchiKey
 from rdkit.Chem.Crippen import MolLogP
 from rdkit.Chem.Descriptors import ExactMolWt
 from rdkit.Chem.Lipinski import NumHDonors, NumHAcceptors
-from autosklearn.estimators import AutoSklearnRegressor
+from autosklearn.estimators import AutoSklearnRegressor, AutoSklearnClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
 from keter.datasets.constructed import Safety, Feasibility
-from keter.datasets.raw import Tox21
+from keter.datasets.raw import Tox21, Bbbp
 from keter.actors.vectors import ChemicalLanguage
 from keter.stage import Stage, ReadOnlyStage
 
@@ -19,19 +19,35 @@ class Analyzer:
 
     def __init__(self, mode="prod", stage: Stage = ReadOnlyStage()):
         model_file = (stage.MODEL_ROOT / f"{self.filename}_{mode}").with_suffix(".pkz")
-        self.preprocessor = ChemicalLanguage("bow")
+        if mode == "doc2vec":
+            self.preprocessor = ChemicalLanguage("doc2vec", stage=stage)
+        elif mode == "lda":
+            self.preprocessor = ChemicalLanguage("lda", stage=stage)
+        else:
+            self.preprocessor = ChemicalLanguage("bow", stage=stage)
         self.stage = stage
-        if mode == "prod":
-            self.safety, self.feasibility = stage.cache(model_file, self.train)
+        if mode in ["doc2vec", "prod", "lda"]:
+            self.safety, self.feasibility, self.bbbp = stage.cache(
+                model_file, self.train
+            )
         elif mode == "test":
-            self.safety, self.feasibility = self.train(score=True, task_duration=300)
+            self.safety, self.feasibility, self.bbbp = self.train(
+                score=True, task_duration=900
+            )
         else:
             raise ValueError(f"Invalid mode: {mode}")
 
-    def train(self, score=False, task_duration=14400):
-        def train_model(data, target_label):
+    def train(self, score=False, task_duration=32400):
+        safety_task_duration = task_duration // 2
+        feasibility_task_duration = task_duration // 4
+        bbbp_task_duration = task_duration // 4
+
+        def train_model(data, target_label, duration, regressor=True):
             dataframe = data.to_df(stage=self.stage)
-            model = AutoSklearnRegressor(time_left_for_this_task=task_duration)
+            if regressor:
+                model = AutoSklearnRegressor(time_left_for_this_task=duration)
+            else:
+                model = AutoSklearnClassifier(time_left_for_this_task=duration)
 
             if score:
                 Xt, Xv, yt, yv = train_test_split(
@@ -51,8 +67,10 @@ class Analyzer:
 
             return model
 
-        return train_model(Safety(), "safety"), train_model(
-            Feasibility(), "feasibility"
+        return (
+            train_model(Safety(), "safety", safety_task_duration),
+            train_model(Feasibility(), "feasibility", feasibility_task_duration),
+            train_model(Bbbp(), "p_np", bbbp_task_duration, regressor=False),
         )
 
     def analyze(self, smiles: List[str], only_drugs=True) -> pd.DataFrame:
@@ -78,6 +96,7 @@ class Analyzer:
         # Scores
         safety = self.safety.predict(features)
         feasibility = self.feasibility.predict(features)
+        bbbp = self.bbbp.predict_proba(features)
 
         dataframe = pd.DataFrame(
             {
@@ -89,6 +108,7 @@ class Analyzer:
                 "hacceptors": hacceptors,
                 "safety": safety,
                 "feasibility": feasibility,
+                "bbbp": (i[1] for i in bbbp),
             }
         )
 
@@ -100,8 +120,8 @@ class Analyzer:
             dataframe = dataframe[dataframe.logp <= 5]
 
             # Filter too toxic and infeasible compounds
-            dataframe = dataframe[dataframe.safety > 0.7]
-            dataframe = dataframe[dataframe.feasibility > 0.7]
+            dataframe = dataframe[dataframe.safety > 0.75]
+            dataframe = dataframe[dataframe.feasibility > 0.75]
 
             dataframe = dataframe.reset_index(drop=True)
 

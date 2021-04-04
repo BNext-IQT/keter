@@ -2,3 +2,5 @@ Frozen-Flask
 auto-sklearn
 flair
 pandas
+tqdm
+pyarrow
