@@ -6,6 +6,7 @@ def drug_discovery_on_moses(mode="prod"):
     from keter.stage import FileSystemStage
     from keter.actors.sklearn import Analyzer
     from keter.datasets.raw import Moses
+    from keter.interfaces.chemistry import create_jamstack
 
     stage = FileSystemStage()
     if mode == "prod":
@@ -31,7 +32,6 @@ def drug_discovery_on_moses(mode="prod"):
     pd.concat(blocks).reset_index(drop=True).to_parquet(
         stage.OUTPUTS_ROOT / "moses_drugs.parquet"
     )
-    from keter.interfaces.chemistry import create_jamstack
 
     create_jamstack()
 
