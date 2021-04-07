@@ -4,3 +4,4 @@ flair
 pandas
 tqdm
 pyarrow
+selfies
