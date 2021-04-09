@@ -65,6 +65,7 @@ class ChemicalUnderstandingTARS:
         self.model = TARSClassifier(
             task_name="Toxicity",
             label_dictionary=tox_corpus.make_label_dictionary(),
+            document_embeddings="distilbert-base-uncased",
         )
 
         trainer = ModelTrainer(self.model, tox_corpus)
