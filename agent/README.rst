@@ -23,6 +23,8 @@ This project is pre-alpha, so it's recommended to use:
 Usage
 ~~~~~
 
+::
+    python -c 'from keter.productions import *; drug_discovery_on_moses()'
 
 
 License and Acknowledgment
