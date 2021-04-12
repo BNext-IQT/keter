@@ -7,22 +7,14 @@ from flair.trainers import ModelTrainer
 from flair.data import Sentence, Corpus, Token
 from flair.datasets import SentenceDataset
 from selfies import encoder
-from keter.cache import DATA_ROOT, MODEL_ROOT
 from keter.datasets.raw import Tox21
-
-
-TRANSFORMED_ROOT = DATA_ROOT / "transformed"
+from keter.stage import Stage, ReadOnlyStage
 
 
 class FlairTox21:
     filename = "flair_tox21"
 
-    def to_corpus(self, cache=False) -> Corpus:
-        data_file = (TRANSFORMED_ROOT / self.filename).with_suffix(".pkz")
-        if data_file.exists():
-            with lzma.open(data_file) as fd:
-                return pickle.load(fd)
-
+    def to_corpus(self) -> Corpus:
         dataset = Tox21().to_df()
 
         def plain_tokenizer(text: str) -> Iterable[Token]:
@@ -57,18 +49,14 @@ class FlairTox21:
 
         corpus = Corpus(train, dev, test, "Molecules")
 
-        if cache:
-            TRANSFORMED_ROOT.mkdir(parents=True, exist_ok=True)
-            with lzma.open(data_file, "wb") as fd:
-                pickle.dump(corpus, fd)
-
         return corpus
 
 
 class ChemicalUnderstandingTARS:
     filename = "chemical_understanding_tars"
 
-    def __init__(self, mode="default"):
+    def __init__(self, mode="default", stage: Stage = ReadOnlyStage()):
+        self.stage = stage
         self.train()
 
     def train(self):
@@ -77,12 +65,13 @@ class ChemicalUnderstandingTARS:
         self.model = TARSClassifier(
             task_name="Toxicity",
             label_dictionary=tox_corpus.make_label_dictionary(),
+            document_embeddings="distilbert-base-uncased",
         )
 
         trainer = ModelTrainer(self.model, tox_corpus)
 
         trainer.train(
-            base_path=MODEL_ROOT / self.filename,
+            base_path=self.stage.MODEL_ROOT / self.filename,
             learning_rate=0.02,
             mini_batch_size=16,
             mini_batch_chunk_size=4,

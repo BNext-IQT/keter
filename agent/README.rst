@@ -1,10 +1,14 @@
 Keter Agent
 ~~~~~~~~~~~
 
+The purpose of this software:
+
+* Downloading datasets or creating new semi-sythethic datasets
 * Training or refining antivirial models
-* Train or refining forecasting models
 * Inference using trained models
-* Statically build UIs
+* User interfaces which can be statisically built (JAMStack)
+
+In the future it will include different kinds of models, including forecasting models.
 
 Installation
 ~~~~~~~~~~~~
@@ -19,7 +23,9 @@ This project is pre-alpha, so it's recommended to use:
 Usage
 ~~~~~
 
-Coming soon.
+::
+    python -c 'from keter.productions import *; drug_discovery_on_moses()'
+
 
 License and Acknowledgment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

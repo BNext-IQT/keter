@@ -1,11 +1,28 @@
-from tqdm import tqdm
-import pandas as pd
+def train_tars(mode="prod"):
+    # Interdict the Transformers cache
+    # TODO: Make this cleaner somehow
+    import os
+    from keter.stage import FileSystemStage
+
+    stage = FileSystemStage()
+
+    os.environ["TRANSFORMERS_CACHE"] = str(
+        FileSystemStage().CACHE_ROOT / "external" / "transformers"
+    )
+
+    from keter.actors.flair import ChemicalUnderstandingTARS
+
+    ChemicalUnderstandingTARS()
 
 
 def drug_discovery_on_moses(mode="prod"):
+    from tqdm import tqdm
+    import pandas as pd
+
     from keter.stage import FileSystemStage
     from keter.actors.sklearn import Analyzer
     from keter.datasets.raw import Moses
+    from keter.interfaces.chemistry import create_jamstack
 
     stage = FileSystemStage()
     if mode == "prod":
@@ -31,7 +48,6 @@ def drug_discovery_on_moses(mode="prod"):
     pd.concat(blocks).reset_index(drop=True).to_parquet(
         stage.OUTPUTS_ROOT / "moses_drugs.parquet"
     )
-    from keter.interfaces.chemistry import create_jamstack
 
     create_jamstack()
 
