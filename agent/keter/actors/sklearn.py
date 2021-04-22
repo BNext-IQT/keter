@@ -41,7 +41,7 @@ class Analyzer:
         bbbp_task_duration = task_duration // 4
 
         def train_model(data, target_label, duration, regressor=True):
-            dataframe = data.to_df(stage=self.stage)
+            dataframe = data.to_df()
             if regressor:
                 model = AutoSklearnRegressor(
                     time_left_for_this_task=duration, memory_limit=9216
