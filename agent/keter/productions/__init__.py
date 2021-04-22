@@ -13,7 +13,7 @@ def train_tars(mode="prod"):
 
 
 def drug_discovery_on_moses(mode="prod"):
-    from tqdm import tqdm
+    from tqdm.auto import tqdm
     import pandas as pd
 
     from keter.stage import FileSystemStage, get_path
