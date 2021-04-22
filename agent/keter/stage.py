@@ -30,8 +30,11 @@ class Stage:
             with lzma.open(path, "rb") as fd:
                 return pickle.load(fd)
         elif path.suffix == ".txt.xz":
-            with lzma.open(seq_file, "rt") as fd:
+            with lzma.open(path, "rt") as fd:
                 return fd.readlines()
+        else:
+            with open(path, "rb") as fd:
+                return fd.read()
 
 
 class NullStage(Stage):
@@ -56,6 +59,9 @@ class FileSystemStage(Stage):
             path.parents[0].mkdir(parents=True, exist_ok=True)
             if isinstance(obj, pd.DataFrame):
                 obj.to_parquet(path)
+            if isinstance(obj, bytes):
+                with open(path, "w" + mode) as fd:
+                    fd.write(obj)
             else:
                 with lzma.open(path, "w" + mode) as fd:
                     pickle.dump(obj, fd)
