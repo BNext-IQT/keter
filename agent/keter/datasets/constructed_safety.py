@@ -4,7 +4,11 @@ from zipfile import ZipFile
 from pathlib import Path
 from urllib.request import urlopen
 import pandas as pd
+from tqdm.auto import tqdm
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from keter.actors.vectors import ChemicalLanguage
 from keter.stage import get_path, cache
 
 
@@ -96,3 +100,32 @@ class Tox21Raw:
         for assay in self.tox21_assays:
             yield assay, self.to_df(assay)
 
+
+class Safety:
+    def __init__(self):
+        self.preprocessor = ChemicalLanguage("bow")
+
+    def _determine_assay_score(self, df: pd.DataFrame) -> float:
+        label_encoder = LabelEncoder()
+        label_encoder.fit(df["ASSAY_OUTCOME"])
+        Xt, Xv, yt, yv = train_test_split(
+            self.preprocessor.transform(df["SAMPLE_NAME"]),
+            label_encoder.transform(df["ASSAY_OUTCOME"]),
+            test_size=0.15,
+            random_state=18,
+        )
+
+        model = RandomForestClassifier()
+        model.fit(Xt, yt)
+        return model.score(Xv, yv)
+
+    def construct(self) -> dict:
+        tox21 = Tox21Raw()
+        assay_scores = {}
+        for assay, df in tqdm(
+            tox21.to_dfs(), total=len(tox21.tox21_assays), unit="assay"
+        ):
+            df = df[df["SAMPLE_NAME"].notna()]
+            assay_scores[assay] = self._determine_assay_score(df)
+
+        return assay_scores
