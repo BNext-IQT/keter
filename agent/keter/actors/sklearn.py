@@ -11,29 +11,28 @@ from sklearn.metrics import roc_auc_score
 from keter.datasets.constructed import Safety, Feasibility
 from keter.datasets.raw import Tox21, Bbbp
 from keter.actors.vectors import ChemicalLanguage
-from keter.stage import Stage, ReadOnlyStage
+from keter.stage import cache
 
 
 class Analyzer:
     filename = "analyzer"
 
-    def __init__(self, mode="prod", stage: Stage = ReadOnlyStage()):
-        self.stage = stage
-        model_file = (stage.MODEL_ROOT / f"{self.filename}_{mode}").with_suffix(".pkz")
+    def __init__(self, mode="prod"):
+        model_file = f"{self.filename}_{mode}.pkz"
 
         if "doc2vec" in mode:
-            self.preprocessor = ChemicalLanguage("doc2vec", stage=stage)
+            self.preprocessor = ChemicalLanguage("doc2vec")
         elif "lda" in mode:
-            self.preprocessor = ChemicalLanguage("lda", stage=stage)
+            self.preprocessor = ChemicalLanguage("lda")
         else:
-            self.preprocessor = ChemicalLanguage("bow", stage=stage)
+            self.preprocessor = ChemicalLanguage("bow")
         if "test" in mode:
             self.safety, self.feasibility, self.bbbp = self.train(
                 score=True, task_duration=12000
             )
         else:
-            self.safety, self.feasibility, self.bbbp = stage.cache(
-                model_file, self.train
+            self.safety, self.feasibility, self.bbbp = cache(
+                "model", model_file, self.train
             )
 
     def train(self, score=False, task_duration=32400):
@@ -44,9 +43,13 @@ class Analyzer:
         def train_model(data, target_label, duration, regressor=True):
             dataframe = data.to_df(stage=self.stage)
             if regressor:
-                model = AutoSklearnRegressor(time_left_for_this_task=duration)
+                model = AutoSklearnRegressor(
+                    time_left_for_this_task=duration, memory_limit=9216
+                )
             else:
-                model = AutoSklearnClassifier(time_left_for_this_task=duration)
+                model = AutoSklearnClassifier(
+                    time_left_for_this_task=duration, memory_limit=9216
+                )
 
             if score:
                 Xt, Xv, yt, yv = train_test_split(

@@ -3,20 +3,20 @@ import lzma
 from typing import Sequence
 from keter.models.vectors import ChemicalLanguageModule, ChemicalLanguageHyperparameters
 from keter.datasets.constructed import Unlabeled, Safety
-from keter.stage import Stage, ReadOnlyStage
+from keter.stage import cache
 
 
 class ChemicalLanguage:
     filename = "chemical_language"
 
-    def __init__(self, mode="bow", stage: Stage = ReadOnlyStage()):
-        self.stage = stage
-        model_file = (stage.MODEL_ROOT / f"{self.filename}_{mode}").with_suffix(".pkz")
+    def __init__(self, mode="bow"):
+        model_file = f"{self.filename}_{mode}.pkz"
 
         if mode == "default":
-            self.model = stage.cache(model_file, self.train)
+            self.model = cache("model", model_file, self.train)
         elif mode == "bow":
-            self.model = stage.cache(
+            self.model = cache(
+                "model",
                 model_file,
                 lambda: self.train(
                     ChemicalLanguageHyperparameters.from_dict(
@@ -25,19 +25,23 @@ class ChemicalLanguage:
                 ),
             )
         elif mode == "lda":
-            self.model = stage.cache(
+            self.model = cache(
+                "model",
                 model_file,
                 lambda: self.train(
                     ChemicalLanguageHyperparameters.from_dict(
-                        {"vector_algo": "lda", "topics": 100}
+                        {"vector_algo": "lda", "topics": 1000}
                     )
                 ),
             )
         elif mode == "doc2vec":
-            self.model = stage.cache(
+            self.model = cache(
+                "model",
                 model_file,
                 lambda: self.train(
-                    ChemicalLanguageHyperparameters.from_dict({"doc_epochs": 30})
+                    ChemicalLanguageHyperparameters.from_dict(
+                        {"doc_epochs": 300, "vec_dims": 512}
+                    )
                 ),
             )
         else:

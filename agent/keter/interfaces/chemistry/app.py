@@ -2,7 +2,7 @@ from pathlib import Path
 import pandas as pd
 from flask import Flask, render_template, abort
 from flask_frozen import Freezer
-from keter.stage import ReadOnlyStage
+from keter.stage import get_path
 
 
 class DrugDatabase:
@@ -30,7 +30,7 @@ db = DrugDatabase()
 
 @app.before_first_request
 def make_drug_db():
-    db.make_drug_db(ReadOnlyStage().OUTPUTS_ROOT)
+    db.make_drug_db(get_path("output"))
 
 
 @app.route("/drug/<key>")
@@ -49,7 +49,7 @@ def index():
 
 def create_jamstack():
     app.config["FREEZER_IGNORE_MIMETYPE_WARNINGS"] = True
-    app.config["FREEZER_DESTINATION"] = ReadOnlyStage().OUTPUTS_ROOT / "static_html"
+    app.config["FREEZER_DESTINATION"] = get_path("output") / "static_html"
     freezer = Freezer(app)
     freezer.freeze()
 

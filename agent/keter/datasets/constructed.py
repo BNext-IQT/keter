@@ -3,7 +3,7 @@ from typing import List, Sequence
 from dateutil.parser import parse
 import pandas as pd
 import numpy as np
-from keter.stage import Stage, ReadOnlyStage
+from keter.stage import cache, get_path
 from keter.datasets.raw import (
     Tox21,
     ToxCast,
@@ -22,18 +22,18 @@ from keter.operations import construct_infection_records
 
 
 class ConstructedData:
-    def to_df(self, stage: Stage = ReadOnlyStage()) -> pd.DataFrame:
-        path = (stage.DATA_ROOT / "constructed" / self.filename).with_suffix(".parquet")
-        return stage.cache(path, lambda: self.construct(stage))
+    def to_df(self) -> pd.DataFrame:
+        name = self.filename + ".parquet"
+        return cache("constructed", name, lambda: self.construct())
 
 
 class Safety(ConstructedData):
     filename = "safety"
 
-    def construct(self, stage: Stage) -> pd.DataFrame:
+    def construct(self) -> pd.DataFrame:
         dataframe = pd.merge(
-            self._normalize_tox(Tox21().to_df(stage)),
-            self._normalize_tox(ToxCast().to_df(stage)),
+            self._normalize_tox(Tox21().to_df()),
+            self._normalize_tox(ToxCast().to_df()),
             on="smiles",
             how="outer",
             sort=False,
@@ -60,8 +60,8 @@ class Safety(ConstructedData):
 class Feasibility(ConstructedData):
     filename = "feasibility"
 
-    def construct(self, stage: Stage = ReadOnlyStage()) -> pd.DataFrame:
-        esol = ESOL().to_df(stage)
+    def construct(self) -> pd.DataFrame:
+        esol = ESOL().to_df()
         esol_ylabel = "ESOL predicted log solubility in mols per litre"
 
         # Normalize feasibility score
@@ -77,25 +77,23 @@ class Feasibility(ConstructedData):
 class Unlabeled(ConstructedData):
     filename = "unlabeled"
 
-    def to_list(self, stage: Stage = ReadOnlyStage()) -> List[str]:
-        return self.to_df(stage=stage)["smiles"].tolist()
+    def to_list(self) -> List[str]:
+        return self.to_df()["smiles"].tolist()
 
-    def construct(self, stage: Stage) -> pd.DataFrame:
+    def construct(self) -> pd.DataFrame:
         dataframe = (
             pd.concat(
                 [
-                    Moses()
-                    .to_df(stage)[["SMILES"]]
-                    .rename(columns={"SMILES": "smiles"}),
-                    ToxCast().to_df(stage)[["smiles"]],
-                    Tox21().to_df(stage)[["smiles"]],
-                    Bbbp().to_df(stage)[["smiles"]],
-                    Muv().to_df(stage)[["smiles"]],
-                    Sider().to_df(stage)[["smiles"]],
-                    ClinTox().to_df(stage)[["smiles"]],
-                    Pcba().to_df(stage)[["smiles"]],
-                    Bbbp().to_df(stage)[["smiles"]],
-                    Lipophilicity().to_df(stage)[["smiles"]],
+                    Moses().to_df()[["SMILES"]].rename(columns={"SMILES": "smiles"}),
+                    ToxCast().to_df()[["smiles"]],
+                    Tox21().to_df()[["smiles"]],
+                    Bbbp().to_df()[["smiles"]],
+                    Muv().to_df()[["smiles"]],
+                    Sider().to_df()[["smiles"]],
+                    ClinTox().to_df()[["smiles"]],
+                    Pcba().to_df()[["smiles"]],
+                    Bbbp().to_df()[["smiles"]],
+                    Lipophilicity().to_df()[["smiles"]],
                 ]
             )
             .drop_duplicates()
@@ -108,8 +106,8 @@ class InfectionNet:
     filename = "infectionnet"
 
     # TODO: Respect the stage
-    def to_csv(self, stage: Stage = ReadOnlyStage()) -> Sequence[str]:
-        constructed_data_root = stage.DATA_ROOT / "constructed"
+    def to_csv(self) -> Sequence[str]:
+        constructed_data_root = get_path("constructed")
         csv_file = (constructed_data_root / self.filename).with_suffix(".csv.xz")
 
         if csv_file.exists():
@@ -118,7 +116,7 @@ class InfectionNet:
                     yield line.rstrip()
                 return
 
-        corona_deaths = CoronaDeathsUSA().to_df(stage)
+        corona_deaths = CoronaDeathsUSA().to_df()
         corona_deaths = corona_deaths.rename(
             columns={
                 column: int(parse(column).timestamp())
