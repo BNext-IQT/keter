@@ -59,7 +59,7 @@ class FileSystemStage(Stage):
             path.parents[0].mkdir(parents=True, exist_ok=True)
             if isinstance(obj, pd.DataFrame):
                 obj.to_parquet(path)
-            if isinstance(obj, bytes):
+            elif isinstance(obj, bytes):
                 with open(path, "w" + mode) as fd:
                     fd.write(obj)
             else:
