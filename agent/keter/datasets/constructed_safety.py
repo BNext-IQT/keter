@@ -95,7 +95,7 @@ class Tox21Raw:
             for inner_filename in zip_fd.namelist():
                 if inner_filename.endswith("aggregrated.txt"):
                     with zip_fd.open(inner_filename) as inner_fd:
-                        return pd.read_csv(inner_fd, sep="\t")
+                        return pd.read_csv(inner_fd, sep="\t", index_col=False)
 
     def to_dfs(self) -> Sequence[pd.DataFrame]:
         for assay in self.tox21_assays:
