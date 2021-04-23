@@ -8,6 +8,7 @@ from tqdm.auto import tqdm
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import roc_auc_score
 from keter.actors.vectors import ChemicalLanguage
 from keter.stage import get_path, cache
 
@@ -105,19 +106,22 @@ class Safety:
     def __init__(self):
         self.preprocessor = ChemicalLanguage("bow")
 
-    def _determine_assay_score(self, df: pd.DataFrame) -> float:
+    def _determine_assay_score(self, X: pd.Series, y: pd.Series) -> float:
         label_encoder = LabelEncoder()
-        label_encoder.fit(df["ASSAY_OUTCOME"])
+        y = label_encoder.fit_transform(y)
         Xt, Xv, yt, yv = train_test_split(
-            self.preprocessor.transform(df["SAMPLE_NAME"]),
-            label_encoder.transform(df["ASSAY_OUTCOME"]),
+            self.preprocessor.transform(X),
+            y,
             test_size=0.15,
             random_state=18,
+            stratify=y,
         )
 
         model = RandomForestClassifier()
         model.fit(Xt, yt)
-        return model.score(Xv, yv)
+        yhat = model.predict_proba(Xv)
+        score = roc_auc_score(yv, yhat, multi_class="ovr")
+        return max(0.0, (score - 0.5) * 2)
 
     def construct(self) -> dict:
         tox21 = Tox21Raw()
@@ -126,6 +130,8 @@ class Safety:
             tox21.to_dfs(), total=len(tox21.tox21_assays), unit="assay"
         ):
             df = df[df["SAMPLE_NAME"].notna()]
-            assay_scores[assay] = self._determine_assay_score(df)
+            X = df["SAMPLE_NAME"]
+            y = df["ASSAY_OUTCOME"]
+            assay_scores[assay] = self._determine_assay_score(X, y)
 
         return assay_scores
