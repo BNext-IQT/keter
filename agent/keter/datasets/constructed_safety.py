@@ -2,6 +2,7 @@ from typing import Sequence
 from io import BytesIO
 from zipfile import ZipFile
 from pathlib import Path
+from functools import reduce
 from urllib.request import urlopen
 import pandas as pd
 from tqdm.auto import tqdm
@@ -100,6 +101,28 @@ class Tox21Raw:
     def to_dfs(self) -> Sequence[pd.DataFrame]:
         for assay in self.tox21_assays:
             yield assay, self.to_df(assay)
+
+    def construct(self) -> pd.DataFrame:
+        def filter_dfs(assay, df):
+            df = df[df.SAMPLE_DATA_TYPE == "activity"]
+            df = pd.DataFrame({"smiles": df["SMILES"], assay: df["REPRODUCIBILITY"]})
+            return df.dropna().drop_duplicates(subset=["smiles"], keep="last")
+
+        result = reduce(
+            lambda left, right: pd.merge(
+                left,
+                right,
+                on="smiles",
+                how="outer",
+                sort=False,
+            ),
+            (filter_dfs(assay, df) for assay, df in self.to_dfs()),
+        )
+
+        return result.copy()
+
+    def to_combined_df(self) -> pd.DataFrame:
+        return cache("constructed", "safety2.parquet", self.construct)
 
 
 class Safety:
