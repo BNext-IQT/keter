@@ -5,16 +5,18 @@ from pathlib import Path
 from functools import reduce
 from urllib.request import urlopen
 import pandas as pd
+import numpy as np
 from tqdm.auto import tqdm
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import roc_auc_score
 from keter.actors.vectors import ChemicalLanguage
 from keter.stage import get_path, cache
+from keter.datasets.constructed import ConstructedData
 
 
-class Tox21Raw:
+class Tox21Full(ConstructedData):
+    filename = "tox21_full_combined"
     tox21_assays = [
         "tox21-ahr-p1",
         "tox21-ap1-agonist-p1",
@@ -89,7 +91,7 @@ class Tox21Raw:
         raw_url = f"https://tripod.nih.gov/tox21/assays/download/{assay}.zip"
         return urlopen(raw_url).read()
 
-    def to_df(self, assay: str) -> pd.DataFrame:
+    def to_df_by_assay(self, assay: str) -> pd.DataFrame:
         raw = cache("raw", Path("tox21") / f"{assay}.zip", lambda: self.download(assay))
         raw_fd = BytesIO(raw)
         with ZipFile(raw_fd) as zip_fd:
@@ -100,7 +102,7 @@ class Tox21Raw:
 
     def to_dfs(self) -> Sequence[pd.DataFrame]:
         for assay in self.tox21_assays:
-            yield assay, self.to_df(assay)
+            yield assay, self.to_df_by_assay(assay)
 
     def construct(self) -> pd.DataFrame:
         def filter_dfs(assay, df):
@@ -116,22 +118,28 @@ class Tox21Raw:
                 how="outer",
                 sort=False,
             ),
-            (filter_dfs(assay, df) for assay, df in self.to_dfs()),
+            (
+                filter_dfs(assay, df)
+                for assay, df in tqdm(
+                    self.to_dfs(), total=len(self.tox21_assays), unit="assay"
+                )
+            ),
         )
 
-        return result.copy()
+        result = result.replace(
+            ["possible_mismatch", "mismatch", "active_match", "inactive_match"],
+            ["inconclusive", "inconclusive", "active", "inactive"],
+        ).fillna("inconclusive")
+        return result
 
-    def to_combined_df(self) -> pd.DataFrame:
-        return cache("constructed", "safety2.parquet", self.construct)
 
+class Safety(ConstructedData):
+    filename = "safety2"
 
-class Safety:
     def __init__(self):
         self.preprocessor = ChemicalLanguage("bow")
 
     def _determine_assay_score(self, X: pd.Series, y: pd.Series) -> float:
-        label_encoder = LabelEncoder()
-        y = label_encoder.fit_transform(y)
         Xt, Xv, yt, yv = train_test_split(
             self.preprocessor.transform(X),
             y,
@@ -147,14 +155,25 @@ class Safety:
         return max(0.0, (score - 0.5) * 2)
 
     def construct(self) -> dict:
-        tox21 = Tox21Raw()
-        assay_scores = {}
-        for assay, df in tqdm(
-            tox21.to_dfs(), total=len(tox21.tox21_assays), unit="assay"
-        ):
-            df = df[df["SAMPLE_NAME"].notna()]
-            X = df["SAMPLE_NAME"]
-            y = df["ASSAY_OUTCOME"]
-            assay_scores[assay] = self._determine_assay_score(X, y)
+        tox21 = Tox21Full()
+        df = tox21.to_df()
+        X = df["smiles"]
+        df = df.replace(["inconclusive", "active", "inactive"], [0.0, 1.0, -1.0])
+        for column in tqdm(df, total=len(tox21.tox21_assays) + 1, unit="assay"):
+            if column == "smiles":
+                continue
+            y = df[column]
+            try:
+                score = self._determine_assay_score(X, y)
+                df[column] = df[column] * score
+            except:
+                df = df.drop(columns=column)
 
-        return assay_scores
+        df["safety"] = df.sum(axis=1)
+        min_val = df["safety"].min()
+        max_val = df["safety"].max()
+        df["safety"] = 1 - (df["safety"] - min_val) ** (1 / 2) / np.sqrt(
+            np.abs(min_val) + max_val
+        )
+
+        return df[["smiles", "safety"]].reset_index(drop=True)
