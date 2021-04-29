@@ -1,12 +1,12 @@
 from functools import reduce
 import pandas as pd
-from keter.stage import ReadOnlyStage, Stage
+from keter.stage import cache
 
 
 class RawData:
-    def to_df(self, stage: Stage = ReadOnlyStage()) -> pd.DataFrame:
-        path = (stage.DATA_ROOT / "raw" / self.filename).with_suffix(".parquet")
-        return stage.cache(path, self.download)
+    def to_df(self) -> pd.DataFrame:
+        name = self.filename + ".parquet"
+        return cache("raw", name, self.download)
 
     def download(self) -> pd.DataFrame:
         # All raw data uses CSV at this time

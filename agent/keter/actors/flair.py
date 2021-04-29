@@ -8,7 +8,7 @@ from flair.data import Sentence, Corpus, Token
 from flair.datasets import SentenceDataset
 from selfies import encoder
 from keter.datasets.raw import Tox21
-from keter.stage import Stage, ReadOnlyStage
+from keter.stage import get_path
 
 
 class FlairTox21:
@@ -55,8 +55,7 @@ class FlairTox21:
 class ChemicalUnderstandingTARS:
     filename = "chemical_understanding_tars"
 
-    def __init__(self, mode="default", stage: Stage = ReadOnlyStage()):
-        self.stage = stage
+    def __init__(self, mode="default"):
         self.train()
 
     def train(self):
@@ -71,9 +70,8 @@ class ChemicalUnderstandingTARS:
         trainer = ModelTrainer(self.model, tox_corpus)
 
         trainer.train(
-            base_path=self.stage.MODEL_ROOT / self.filename,
+            base_path=get_path("model") / self.filename,
             learning_rate=0.02,
-            mini_batch_size=16,
-            mini_batch_chunk_size=4,
+            mini_batch_size=1,
             max_epochs=10,
         )

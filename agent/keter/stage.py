@@ -1,21 +1,27 @@
 import os
+from enum import Enum
 import pickle
 from pathlib import Path
 from typing import Sequence, Callable, Any
 import lzma
 import pandas as pd
-from dvc.repo import Repo
+
+
+_stage = [None]
 
 
 class Stage:
-    CACHE_ROOT = (
-        os.environ.get("KETER_CACHE")
-        or (Path(__file__).parent.parent.parent / "cache").absolute()
-    )
+    def __init__(self):
+        global _stage
+        self._old_stage = _stage[0]
+        _stage[0] = self
 
-    DATA_ROOT = CACHE_ROOT / "data"
-    MODEL_ROOT = CACHE_ROOT / "models"
-    OUTPUTS_ROOT = CACHE_ROOT / "outputs"
+    def __enter__(self):
+        pass
+
+    def __exit__(self, *kwargs):
+        global _stage
+        _stage[0] = self._old_stage
 
     def _read_cache(self, path: Path):
         if path.suffix == ".parquet":
@@ -24,8 +30,11 @@ class Stage:
             with lzma.open(path, "rb") as fd:
                 return pickle.load(fd)
         elif path.suffix == ".txt.xz":
-            with lzma.open(seq_file, "rt") as fd:
+            with lzma.open(path, "rt") as fd:
                 return fd.readlines()
+        else:
+            with open(path, "rb") as fd:
+                return fd.read()
 
 
 class NullStage(Stage):
@@ -50,15 +59,41 @@ class FileSystemStage(Stage):
             path.parents[0].mkdir(parents=True, exist_ok=True)
             if isinstance(obj, pd.DataFrame):
                 obj.to_parquet(path)
+            elif isinstance(obj, bytes):
+                with open(path, "w" + mode) as fd:
+                    fd.write(obj)
             else:
                 with lzma.open(path, "w" + mode) as fd:
                     pickle.dump(obj, fd)
             return obj
 
 
-def cache_old(files: Sequence, msg: str):
-    return
-    repo = Repo()
-    repo.add(files)
-    repo.commit(files)
-    repo.push(files)
+def cache(product: str, name: str, func: Callable) -> Any:
+    stage = _stage[0]
+    if not stage:
+        raise ValueError(
+            "There is no stage defined. Make sure you only call "
+            "actors and datasets inside of a stage block."
+        )
+    else:
+        return stage.cache(get_path(product) / name, func)
+
+
+def get_path(product: str) -> Path:
+    CACHE_ROOT = (
+        os.environ.get("KETER_CACHE")
+        or (Path(__file__).parent.parent.parent / "cache").absolute()
+    )
+
+    if product == "raw":
+        return CACHE_ROOT / "data" / "raw"
+    if product == "constructed":
+        return CACHE_ROOT / "data" / "constructed"
+    elif product == "model":
+        return CACHE_ROOT / "models"
+    elif product == "output":
+        return CACHE_ROOT / "outputs"
+    elif product == "external":
+        return CACHE_ROOT / "external"
+    else:
+        raise ValueError(f"Invalid product: {product}")

@@ -11,31 +11,29 @@ from sklearn.metrics import roc_auc_score
 from keter.datasets.constructed import Safety, Feasibility
 from keter.datasets.raw import Tox21, Bbbp
 from keter.actors.vectors import ChemicalLanguage
-from keter.stage import Stage, ReadOnlyStage
+from keter.stage import cache
 
 
 class Analyzer:
     filename = "analyzer"
 
-    def __init__(self, mode="prod", stage: Stage = ReadOnlyStage()):
-        model_file = (stage.MODEL_ROOT / f"{self.filename}_{mode}").with_suffix(".pkz")
-        if mode == "doc2vec":
-            self.preprocessor = ChemicalLanguage("doc2vec", stage=stage)
-        elif mode == "lda":
-            self.preprocessor = ChemicalLanguage("lda", stage=stage)
+    def __init__(self, mode="prod"):
+        model_file = f"{self.filename}_{mode}.pkz"
+
+        if "doc2vec" in mode:
+            self.preprocessor = ChemicalLanguage("doc2vec")
+        elif "lda" in mode:
+            self.preprocessor = ChemicalLanguage("lda")
         else:
-            self.preprocessor = ChemicalLanguage("bow", stage=stage)
-        self.stage = stage
-        if mode in ["doc2vec", "prod", "lda"]:
-            self.safety, self.feasibility, self.bbbp = stage.cache(
-                model_file, self.train
-            )
-        elif mode == "test":
+            self.preprocessor = ChemicalLanguage("bow")
+        if "test" in mode:
             self.safety, self.feasibility, self.bbbp = self.train(
-                score=True, task_duration=900
+                score=True, task_duration=12000
             )
         else:
-            raise ValueError(f"Invalid mode: {mode}")
+            self.safety, self.feasibility, self.bbbp = cache(
+                "model", model_file, self.train
+            )
 
     def train(self, score=False, task_duration=32400):
         safety_task_duration = task_duration // 2
@@ -43,11 +41,15 @@ class Analyzer:
         bbbp_task_duration = task_duration // 4
 
         def train_model(data, target_label, duration, regressor=True):
-            dataframe = data.to_df(stage=self.stage)
+            dataframe = data.to_df()
             if regressor:
-                model = AutoSklearnRegressor(time_left_for_this_task=duration)
+                model = AutoSklearnRegressor(
+                    time_left_for_this_task=duration, memory_limit=9216
+                )
             else:
-                model = AutoSklearnClassifier(time_left_for_this_task=duration)
+                model = AutoSklearnClassifier(
+                    time_left_for_this_task=duration, memory_limit=9216
+                )
 
             if score:
                 Xt, Xv, yt, yv = train_test_split(
