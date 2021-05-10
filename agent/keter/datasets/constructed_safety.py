@@ -105,31 +105,41 @@ class Tox21Full(ConstructedData):
             yield assay, self.to_df_by_assay(assay)
 
     def construct(self) -> pd.DataFrame:
-        def filter_dfs(assay, df):
-            df = df[df.SAMPLE_DATA_TYPE == "activity"]
-            df = pd.DataFrame({"smiles": df["SMILES"], assay: df["REPRODUCIBILITY"]})
-            return df.dropna().drop_duplicates(subset=["smiles"], keep="last")
+        def create_assay_df(assay: str, df: pd.DataFrame) -> pd.DataFrame:
+            if "antagonist" in assay:
+                test_type = "active antagonist"
+            elif "agonist" in assay:
+                test_type = "active agonist"
+            else:
+                test_type = "active "
+
+            def clarify_df(raw_df: pd.DataFrame) -> pd.DataFrame:
+                for name, group in raw_df.groupby("SMILES"):
+                    try:
+                        if group["ASSAY_OUTCOME"].str.contains(test_type).any():
+                            yield name, 1.0
+                        else:
+                            yield name, 0.0
+                    except AttributeError:
+                        yield name, float("NaN")
+
+            return pd.DataFrame(clarify_df(df), columns=["smiles", assay])
 
         result = reduce(
             lambda left, right: pd.merge(
-                left,
-                right,
-                on="smiles",
-                how="outer",
-                sort=False,
+                left, right, on="smiles", how="outer", sort=False,
             ),
             (
-                filter_dfs(assay, df)
+                create_assay_df(assay, df)
                 for assay, df in tqdm(
-                    self.to_dfs(), total=len(self.tox21_assays), unit="assay"
+                    self.to_dfs(),
+                    total=len(self.tox21_assays),
+                    unit="assay",
+                    desc="[Dataset] Tox21Full",
                 )
             ),
         )
 
-        result = result.replace(
-            ["possible_mismatch", "mismatch", "active_match", "inactive_match"],
-            ["inconclusive", "inconclusive", "active", "inactive"],
-        ).fillna("inconclusive")
         return result
 
 
@@ -159,7 +169,7 @@ class Safety(ConstructedData):
         df = tox21.to_df()
         X = df["smiles"]
         df = df.replace(["inconclusive", "active", "inactive"], [0.0, 1.0, -1.0])
-        for column in tqdm(df, total=len(tox21.tox21_assays) + 1, unit="assay"):
+        for column in tqdm(
             if column == "smiles":
                 continue
             y = df[column]

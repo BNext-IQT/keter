@@ -24,7 +24,7 @@ from keter.operations import construct_infection_records
 class ConstructedData:
     def to_df(self) -> pd.DataFrame:
         name = self.filename + ".parquet"
-        return cache("constructed", name, lambda: self.construct())
+        return cache("constructed", name, self.construct)
 
 
 class Safety(ConstructedData):
