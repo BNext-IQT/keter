@@ -84,10 +84,11 @@ def get_path(product: str) -> Path:
         os.environ.get("KETER_CACHE")
         or (Path(__file__).parent.parent.parent / "cache").absolute()
     )
-
-    if product == "raw":
+    if product == "root":
+        return CACHE_ROOT
+    elif product == "raw":
         return CACHE_ROOT / "data" / "raw"
-    if product == "constructed":
+    elif product == "constructed":
         return CACHE_ROOT / "data" / "constructed"
     elif product == "model":
         return CACHE_ROOT / "models"
