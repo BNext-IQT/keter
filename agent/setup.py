@@ -6,9 +6,13 @@ from setuptools.command.test import test
 import sys
 import os
 
+exit_due_to_failure = False
+
 print("Checking for RDKit... ", end="")
 try:
     from rdkit import Chem
+
+    print("SUCCESS!")
 except ImportError:
     print("ERROR!")
     print("ERROR: RDKit not found. It is required and must be installed seperately.")
@@ -21,8 +25,29 @@ except ImportError:
         print("  conda install -c conda-forge rdkit")
     except:
         pass
+    exit_due_to_failure = True
+
+print("Checking for PyTorch... ", end="")
+try:
+    import torch
+
+    print("SUCCESS!")
+except ImportError:
+    print("ERROR!")
+    print("ERROR: PyTorch not found. It is required and must be installed seperately.")
+    print("See: https://pytorch.org/get-started/locally/")
+    try:
+        import conda
+
+        print("")
+        print("Since you have conda installed, you might want to try:")
+        print("  conda install pytorch torchvision torchaudio -c pytorch")
+    except:
+        pass
+    exit_due_to_failure = True
+
+if exit_due_to_failure:
     exit(-1)
-print("SUCCESS!")
 
 
 class PyTest(test):
@@ -70,11 +95,7 @@ setup(
     packages=find_packages(),
     install_requires=install_requires,
     tests_require=["pytest"],
-    entry_points={
-        "console_scripts": [
-            "keter = keter.__main__:main",
-        ],
-    },
+    entry_points={"console_scripts": ["keter = keter.__main__:main",],},
     ext_modules=cythonize("keter/operations.pyx", language_level="3"),
     cmdclass={"test": PyTest},
 )
