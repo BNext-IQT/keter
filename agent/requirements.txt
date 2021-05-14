@@ -1,7 +1,10 @@
-Frozen-Flask
-auto-sklearn
+torch-geometric
+torch-sparse
+torch-scatter
 flair
 pandas
 tqdm
 pyarrow
 selfies
+Frozen-Flask
+auto-sklearn

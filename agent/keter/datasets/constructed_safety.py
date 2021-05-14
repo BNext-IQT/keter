@@ -168,8 +168,13 @@ class Safety(ConstructedData):
         tox21 = Tox21Full()
         df = tox21.to_df()
         X = df["smiles"]
-        df = df.replace(["inconclusive", "active", "inactive"], [0.0, 1.0, -1.0])
+        df = df.replace([float("NaN"), 1.0, 0.0], [0.0, 1.0, -1.0])
         for column in tqdm(
+            df,
+            total=len(tox21.tox21_assays) + 1,
+            unit="assay",
+            desc="[Dataset] Safety",
+        ):
             if column == "smiles":
                 continue
             y = df[column]
