@@ -48,12 +48,12 @@ class ChemicalLanguage:
             raise ValueError("Invalid mode: " + mode)
 
     def train(self, hyperparams=ChemicalLanguageHyperparameters()):
-        safety = Safety().to_df(self.stage)
+        safety = Safety().to_df()
         X = safety["smiles"]
         y = safety.drop("smiles", axis=1)
         y["safety"] = safety.apply(lambda x: 1 if x.safety > 0.7 else 0, axis=1)
         model = ChemicalLanguageModule(hyperparams)
-        model.fit(Unlabeled().to_list(stage=self.stage), X, y)
+        model.fit(Unlabeled().to_list(), X, y)
         return model
 
     def transform(self, smiles: Sequence[str]) -> Sequence[str]:
