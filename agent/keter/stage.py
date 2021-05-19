@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Sequence, Callable, Any
 import lzma
 import pandas as pd
+from dvc.repo import Repo
 
 
 _stage = [None]
@@ -66,6 +67,24 @@ class FileSystemStage(Stage):
                 with lzma.open(path, "w" + mode) as fd:
                     pickle.dump(obj, fd)
             return obj
+
+
+class DvcStage(FileSystemStage):
+    files = []
+
+    def cache(self, path: Path, func: Callable, mode="b") -> Any:
+        self.files.append(path)
+        return super().cache(path, func, mode)
+
+    def __exit__(self, *kwargs):
+        super().__exit__(*kwargs)
+
+        repo = Repo(get_path("root"))
+
+        repo.add(files)
+        for file in files:
+            repo.commit(file)
+        repo.push(files)
 
 
 def cache(product: str, name: str, func: Callable) -> Any:
