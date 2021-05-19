@@ -46,6 +46,24 @@ except ImportError:
         pass
     exit_due_to_failure = True
 
+print("Checking for Swig... ", end="")
+from shutil import which
+if which("swig"):
+    print("SUCCESS!")
+else:
+    print("ERROR!")
+    print("ERROR: Swig not found. It is required and must be installed seperately.")
+    print("See: https://www.dev2qa.com/how-to-install-swig-on-macos-linux-and-windows/")
+    try:
+        import conda
+
+        print("")
+        print("Since you have conda installed, you might want to try:")
+        print("  conda install -c anaconda swig")
+    except:
+        pass
+    exit_due_to_failure = True
+
 if exit_due_to_failure:
     exit(-1)
 
