@@ -51,10 +51,7 @@ class ChemicalLanguageHyperparameters:
     alpha = 0.05
 
     # LDA hyperparams
-    topic_epochs = 5
-    topic_iterations = 20
     topics = 16
-    decay = 0.5
 
     @staticmethod
     def from_dict(values):
@@ -183,13 +180,7 @@ class ChemicalLanguageModule:
 
         if self.hyperparams.vector_algo == "lda":
             self.topic_model = LdaMulticore(
-                docs,
-                id2word=bow,
-                num_topics=self.hyperparams.topics,
-                iterations=self.hyperparams.topic_iterations,
-                passes=self.hyperparams.topic_epochs,
-                random_state=18,
-                decay=self.hyperparams.decay,
+                docs, id2word=bow, num_topics=self.hyperparams.topics, random_state=18
             )
         self.dictionary = bow
 
