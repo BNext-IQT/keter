@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 LABEL maintainer="JJ Ben-Joseph (jbenjoseph@iqt.org)" \
       description="Contains the UI for managing RQ jobs."
 EXPOSE 8080

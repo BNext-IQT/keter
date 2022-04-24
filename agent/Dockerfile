@@ -1,4 +1,4 @@
-FROM ubuntu:21.04
+FROM ubuntu:22.04
 LABEL maintainer="JJ Ben-Joseph (jbenjoseph@iqt.org)" \
     description="Keter biosecurity platform. Agent container."
 ARG DEBIAN_FRONTEND=noninteractive
